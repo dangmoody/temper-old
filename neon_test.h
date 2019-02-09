@@ -39,7 +39,7 @@ SOFTWARE.
 
 
 TODO(DM):
-	- output test results to file
+	- test & suite start/end callbacks
 	- select specific tests via cmd arg
 	- output colors for mac, linux
 
