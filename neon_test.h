@@ -7,6 +7,8 @@
 #include <stdio.h>
 #include <malloc.h>
 #include <memory.h>
+
+#include <stdbool.h>
 #include <stdint.h>
 
 /*
@@ -39,6 +41,7 @@ SOFTWARE.
 TODO(DM):
 	- output test results to file
 	- select specific tests via cmd arg
+	- output colors for mac, linux
 
 
 1. INTRO:
@@ -108,7 +111,7 @@ extern "C" {
 
 // TODO(DM): put back in
 // TODO(DM): mac, linux, etc.
-enum consoleColor_t {
+typedef enum consoleColor_t {
 #ifdef _WIN32
 	NE_TEST_COLOR_DEFAULT	= 0x07,
 	NE_TEST_COLOR_RED		= 0x0C,
@@ -116,26 +119,26 @@ enum consoleColor_t {
 	NE_TEST_COLOR_BLUE		= 0x09,
 	NE_TEST_COLOR_YELLOW	= 0x0E,
 #endif
-};
+} consoleColor_t;
 
 void NE_Test_SetTextColor( const consoleColor_t color ) {
 #ifdef _WIN32
-	SetConsoleTextAttribute( GetStdHandle( STD_OUTPUT_HANDLE ), static_cast<WORD>( color ) );
+	SetConsoleTextAttribute( GetStdHandle( STD_OUTPUT_HANDLE ), (WORD) color );
 #else
 	// TODO(DM): mac, linux, etc.
 	( (void) color );
 #endif
 }
 
-enum neTestResult_t {
+typedef enum neTestResult_t {
 	NE_TEST_RESULT_PASSED	= 0,
 	NE_TEST_RESULT_FAILED,
 	NE_TEST_RESULT_SKIPPED,
-};
+} neTestResult_t;
 
 typedef neTestResult_t( *neTestFunc_t )( void );
 
-struct neTestContext_t {
+typedef struct neTestContext_t {
 	uint32_t				numPassed;
 	uint32_t				numFailed;
 	uint32_t				numSkipped;
@@ -143,7 +146,7 @@ struct neTestContext_t {
 	uint32_t				line;
 	const char*				file;
 	const char*				msg;
-};
+} neTestContext_t;
 
 neTestContext_t*			g_context	= NULL;
 bool						g_allPassed	= false;
