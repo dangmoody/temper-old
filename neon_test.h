@@ -104,7 +104,7 @@ is run:
 	NE_TEST_SET_SUITE_END_CALLBACK( OnSuiteEnded, userdata );
 
 	NE_TEST_SET_TEST_START_CALLBAK( OnTestStarting, userdata );
-	NE_TEST_SET_TEST_START_CALLBAK( OnTestEnded, userdata );
+	NE_TEST_SET_TEST_END_CALLBAK( OnTestEnded, userdata );
 
 The start callback gets called before just the test/suite runs and the end
 callback gets called just as the test/suite has finished running, before the
