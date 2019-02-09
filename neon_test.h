@@ -45,6 +45,19 @@ Include "neon_test.h" in your project and you're good to go.
 
 
 3. USAGE:
+neon test requires init and shutdown calls.  These can be done anywhere,
+but main() is recommended.  neon test also tracks the return code:
+
+	int main( int argc, char** argv ) {
+		NE_TEST_INIT();
+
+		// do your tests...
+
+		NE_TEST_SHUTDOWN();
+
+		return NE_TEST_EXIT_CODE();
+	}
+
 To create a test:
 
 	NE_TEST( XShouldEqual0 ) {
@@ -81,18 +94,6 @@ neon test will then mark the test as skipped and display the reason
 message in the console, for example:
 
 	SKIPPED: FlakyTest: "TeamCity doesn't like this test for some reason...".
-
-neon test also tracks the return code:
-
-	int main( int argc, char** argv ) {
-		NE_TEST_INIT();
-
-		// do your tests...
-
-		NE_TEST_SHUTDOWN();
-
-		return NE_TEST_EXIT_CODE();
-	}
 
 You can also specify callbacks to run before and after each test and suite
 is run:
@@ -144,39 +145,9 @@ typedef const char*				neTestConsoleColor_t;
 
 typedef enum neTestFlagBits_t {
 	NE_TEST_FLAGS_ABORT_ON_FAIL	= 1ULL << 1,
+	NE_TEST_FLAGS_COLORS		= 1ULL << 2,
 } neTestFlagBits_t;
 typedef uint32_t neTestFlags_t;
-
-static void NE_Test_SetTextColor( const neTestConsoleColor_t color ) {
-#if defined( _WIN32 )
-	SetConsoleTextAttribute( GetStdHandle( STD_OUTPUT_HANDLE ), (WORD) color );
-#elif defined( __linux__ )
-	printf( color );
-#endif
-}
-
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-function"
-#endif
-static const char* NE_Test_GetNextArg( const int argIndex, const int argc, char** argv ) {
-	return ( argIndex + 1 < argc ) ? argv[argIndex + 1] : NULL;
-}
-
-static void NE_Test_ShowUsage( void ) {
-	printf(
-		"neon test:\n"
-		"Usage:\n"
-		"\n"
-		"\thelp       : Shows this help.\n"
-		"\t-t <name>  : Only run the test with the given name.\n"
-		"\t-s <suite> : Only run the suite with the given name.\n"
-		"\t-a         : Abort immediately on test failure.\n"
-	);
-}
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif
 
 typedef enum neTestResult_t {
 	NE_TEST_RESULT_PASSED		= 0,
@@ -217,6 +188,42 @@ typedef struct neTestContext_t {
 
 static neTestContext_t			g_context	= { 0 };
 
+static void NE_Test_SetTextColor( const neTestConsoleColor_t color ) {
+	if ( ( g_context.flags & NE_TEST_FLAGS_COLORS ) == 0 ) {
+		return;
+	}
+
+#if defined( _WIN32 )
+	SetConsoleTextAttribute( GetStdHandle( STD_OUTPUT_HANDLE ), (WORD) color );
+#elif defined( __linux__ )
+	printf( color );
+#endif
+}
+
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-function"
+#endif
+static const char* NE_Test_GetNextArg( const int argIndex, const int argc, char** argv ) {
+	return ( argIndex + 1 < argc ) ? argv[argIndex + 1] : NULL;
+}
+
+static void NE_Test_ShowUsage( void ) {
+	printf(
+		"neon test:\n"
+		"Usage:\n"
+		"\n"
+		"\thelp       : Shows this help.\n"
+		"\t-t <name>  : Only run the test with the given name.\n"
+		"\t-s <suite> : Only run the suite with the given name.\n"
+		"\t-a         : Abort immediately on test failure.\n"
+		"\t-c         : Enable colored output.\n"
+	);
+}
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
+
 #define NE_TEST_INIT() \
 	do { \
 		memset( &g_context, 0, sizeof( neTestContext_t ) ); \
@@ -241,6 +248,7 @@ static neTestContext_t			g_context	= { 0 };
 			if ( arg[0] == '-' ) { \
 				switch ( arg[1] ) { \
 					case 'a': g_context.flags |= NE_TEST_FLAGS_ABORT_ON_FAIL; break; \
+					case 'c': g_context.flags |= NE_TEST_FLAGS_COLORS; break; \
 \
 					case 't': { \
 						const char* testName = NE_Test_GetNextArg( i, argc, argv ); \
