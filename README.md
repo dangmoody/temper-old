@@ -1,4 +1,4 @@
-# neon test
+# Temper
 
 A Single-header-only test framework, written in C99.
 
@@ -18,51 +18,51 @@ I like to open-source most of the things I make in the hope it will be useful to
 
 Installation
 ------------
-Download `neon_test.h` and include it.  Done!
+Download `temper.h` and include it.  Done!
 
 
 Code Usage
 ----------
-neon test requires init and shutdown calls.  These can be done anywhere,
-but main() is recommended.  neon test also tracks the return code:
+Temper requires init and shutdown calls.  These can be done anywhere,
+but main() is recommended.  Temper also tracks the return code:
 ```C
 int main( int argc, char** argv ) {
-	NE_TEST_INIT();
+	TEMPER_INIT();
 
 	// do your tests...
 
-	NE_TEST_SHUTDOWN();
+	TEMPER_SHUTDOWN();
 
-	return NE_TEST_EXIT_CODE();
+	return TEMPER_EXIT_CODE();
 }
 ```
 
 To create a test:
 ```C
-NE_TEST( XShouldEqual0 ) {
+TEMPER_TEST( XShouldEqual0 ) {
 	float x = 0.0f;
-	NE_TEST_EXPECT_TRUE( floateq( x, 0.0f ) );
+	TEMPER_EXPECT_TRUE( floateq( x, 0.0f ) );
 
-	NE_TEST_PASS();
+	TEMPER_PASS();
 }
 ```
 
 The following assert-style macros are given; they do what you'd expect:
-* ```NE_TEST_EXPECT_TRUE( condition );```
-* ```NE_TEST_EXPECT_FALSE( condition );```
+* ```TEMPER_EXPECT_TRUE( condition );```
+* ```TEMPER_EXPECT_FALSE( condition );```
 
 The following macros are given for return results of a test; they do what
 you'd expect:
-* ```NE_TEST_PASS();```
-* ```NE_TEST_FAIL();```
+* ```TEMPER_PASS();```
+* ```TEMPER_FAIL();```
 
 In order to make a test suite that runs a series of tests:
 
 ```C
-NE_TEST_SUITE( TheSuite ) {
-	NE_TEST_RUN_TEST( XShouldEqual0 );
-	NE_TEST_RUN_TEST( SomeOtherTest );
-	NE_TEST_RUN_TEST( SomeOtherOtherTest );
+TEMPER_SUITE( TheSuite ) {
+	TEMPER_RUN_TEST( XShouldEqual0 );
+	TEMPER_RUN_TEST( SomeOtherTest );
+	TEMPER_RUN_TEST( SomeOtherOtherTest );
 }
 ```
 
@@ -71,10 +71,10 @@ Tests can be run in and outside a test-suite, just like greatest.
 If you want to skip a test:
 
 ```C
-NE_TEST_SKIP_TEST( FlakyTest, "TeamCity doesn't like this test for some reason..." );
+TEMPER_SKIP_TEST( FlakyTest, "TeamCity doesn't like this test for some reason..." );
 ```
 
-neon test will then mark the test as skipped and display the reason
+Temper will then mark the test as skipped and display the reason
 message in the console, for example:
 
 ```C
@@ -86,12 +86,12 @@ is run:
 
 ```C
 // per suite
-NE_TEST_SET_SUITE_START_CALLBACK( OnSuiteStarting, userdata );
-NE_TEST_SET_SUITE_END_CALLBACK( OnSuiteEnded, userdata );
+TEMPER_SET_SUITE_START_CALLBACK( OnSuiteStarting, userdata );
+TEMPER_SET_SUITE_END_CALLBACK( OnSuiteEnded, userdata );
 
 // per test
-NE_TEST_SET_TEST_START_CALLBAK( OnTestStarting, userdata );
-NE_TEST_SET_TEST_END_CALLBAK( OnTestEnded, userdata );
+TEMPER_SET_TEST_START_CALLBAK( OnTestStarting, userdata );
+TEMPER_SET_TEST_END_CALLBAK( OnTestEnded, userdata );
 ```
 
 The start callback gets called before just the test/suite runs and the end
@@ -101,7 +101,7 @@ you may pass through them whatever you like.
 
 Command Line Usage
 ------------------
-neon test supports a few command line options:
+Temper supports a few command line options:
 
 ```
 --help     : Shows the help in console.
