@@ -30,7 +30,6 @@ SOFTWARE.
 TODO(DM):
 	- test & suite start/end callbacks
 	- select specific tests via cmd arg
-	- output colors for mac, linux
 
 
 1. INTRO:
