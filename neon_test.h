@@ -126,8 +126,6 @@ you may pass through them whatever you like.
 extern "C" {
 #endif
 
-// TODO(DM): put back in
-// TODO(DM): mac, linux, etc.
 #if defined( _WIN32 )
 #define NE_TEST_COLOR_DEFAULT	0x07
 #define NE_TEST_COLOR_RED		0x0C
