@@ -24,10 +24,9 @@ NE_TEST( XShouldEqualString2 ) {
 }
 
 int main( int argc, char** argv ) {
-	( (void) argc );
-	( (void) argv );
-
 	NE_TEST_INIT();
+
+	NE_TEST_SET_COMMAND_LINE_ARGS( argc, argv );
 
 	NE_TEST_RUN_TEST( XShouldEqualString0 );
 	NE_TEST_SKIP_TEST( XShouldEqualString1, "Test skipping test not in a suite." );

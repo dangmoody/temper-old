@@ -66,10 +66,9 @@ NE_TEST_SUITE( TheSuite ) {
 }
 
 int main( int argc, char** argv ) {
-	( (void) argc );
-	( (void) argv );
-
 	NE_TEST_INIT();
+
+	NE_TEST_SET_COMMAND_LINE_ARGS( argc, argv );
 
 	// comment these out for better/stock looking output
 	// this is just to demo the callbacks

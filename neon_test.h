@@ -27,9 +27,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 
-TODO(DM):
-	- select specific tests via cmd arg
-
 CONTENTS:
 	1. INTRO
 	2. INSTALLATION
@@ -147,13 +144,41 @@ typedef uint32_t				neTestConsoleColor_t;
 typedef const char*				neTestConsoleColor_t;
 #endif
 
-void NE_Test_SetTextColor( const neTestConsoleColor_t color ) {
+typedef enum neTestFlagBits_t {
+	NE_TEST_FLAGS_ABORT_ON_FAIL	= 1ULL << 1,
+} neTestFlagBits_t;
+typedef uint32_t neTestFlags_t;
+
+static void NE_Test_SetTextColor( const neTestConsoleColor_t color ) {
 #if defined( _WIN32 )
 	SetConsoleTextAttribute( GetStdHandle( STD_OUTPUT_HANDLE ), (WORD) color );
 #elif defined( __linux__ )
 	printf( color );
 #endif
 }
+
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-function"
+#endif
+static const char* NE_Test_GetNextArg( const int argIndex, const int argc, char** argv ) {
+	return ( argIndex + 1 < argc ) ? argv[argIndex + 1] : NULL;
+}
+
+static void NE_Test_ShowUsage( void ) {
+	printf(
+		"neon test:\n"
+		"Usage:\n"
+		"\n"
+		"\thelp       : Shows this help.\n"
+		"\t-t <name>  : Only run the test with the given name.\n"
+		"\t-s <suite> : Only run the suite with the given name.\n"
+		"\t-a         : Abort immediately on test failure.\n"
+	);
+}
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
 
 typedef enum neTestResult_t {
 	NE_TEST_RESULT_PASSED		= 0,
@@ -163,7 +188,7 @@ typedef enum neTestResult_t {
 
 typedef neTestResult_t( *neTestFunc_t )( void );
 
-typedef void( *testCallback_t )( void* userdata );
+typedef void( *neTestCallback_t )( void* userdata );
 
 typedef struct neTestContext_t {
 	void*						suiteFuncStartData;
@@ -172,19 +197,24 @@ typedef struct neTestContext_t {
 	void*						testFuncStartData;
 	void*						testFuncEndData;
 
-	testCallback_t				suiteFuncStart;
-	testCallback_t				suiteFuncEnd;
+	neTestCallback_t			suiteFuncStart;
+	neTestCallback_t			suiteFuncEnd;
 
-	testCallback_t				testFuncStart;
-	testCallback_t				testFuncEnd;
+	neTestCallback_t			testFuncStart;
+	neTestCallback_t			testFuncEnd;
 
 	uint32_t					numPassed;
 	uint32_t					numFailed;
 	uint32_t					numSkipped;
 
+	neTestFlags_t				flags;
+
 	uint32_t					line;
 	const char*					file;
 	const char*					msg;
+
+	const char*					filteredTest;
+	const char*					filteredSuite;
 } neTestContext_t;
 
 static neTestContext_t			g_context	= { 0 };
@@ -201,6 +231,57 @@ static neTestContext_t			g_context	= { 0 };
 	} while ( 0 )
 
 #define NE_TEST_EXIT_CODE()		( ( g_context.numFailed == 0 ) ? 0 : 1 )
+
+#define NE_TEST_SET_COMMAND_LINE_ARGS( argc, argv ) \
+	do { \
+		for ( int i = 0; i < argc; i++ ) { \
+			const char* arg = argv[i]; \
+\
+			if ( arg[0] == '-' ) { \
+				switch ( arg[1] ) { \
+					case 'a': g_context.flags |= NE_TEST_FLAGS_ABORT_ON_FAIL; break; \
+\
+					case 't': { \
+						const char* testName = NE_Test_GetNextArg( i, argc, argv ); \
+						if ( !testName ) { \
+							NE_Test_ShowUsage(); \
+							exit( EXIT_FAILURE ); \
+						} \
+\
+						g_context.filteredTest = testName; \
+						i++; \
+						break; \
+					} \
+\
+					case 's': { \
+						const char* suiteName = NE_Test_GetNextArg( i, argc, argv ); \
+						if ( !suiteName ) { \
+							NE_Test_ShowUsage(); \
+							exit( EXIT_FAILURE ); \
+						} \
+\
+						g_context.filteredSuite = suiteName; \
+						i++; \
+						break; \
+					} \
+\
+					case '-': { \
+						if ( strcmp( arg, "--help" ) == 0 ) { \
+							NE_Test_ShowUsage(); \
+							exit( EXIT_SUCCESS ); \
+						} \
+						break; \
+					} \
+\
+					default: \
+						printf( "ERROR: '%s' is an unknown arg.\n", arg ); \
+						NE_Test_ShowUsage(); \
+						exit( EXIT_FAILURE ); \
+						break; \
+				} \
+			} \
+		} \
+	} while ( 0 )
 
 #define NE_TEST_SET_TEST_START_CALLBACK( callback, userdata ) \
 	do { \
@@ -237,7 +318,7 @@ static neTestContext_t			g_context	= { 0 };
 		return NE_TEST_RESULT_FAILED; \
 	} while ( 0 )
 
-#define NE_TEST_RUN_SUITE( suite ) \
+#define NE_TEST_RUN_SUITE_INTERNAL( suite ) \
 	do { \
 		if ( g_context.suiteFuncStart ) { \
 			g_context.suiteFuncStart( g_context.suiteFuncStartData ); \
@@ -250,47 +331,83 @@ static neTestContext_t			g_context	= { 0 };
 		} \
 	} while ( 0 )
 
+#define NE_TEST_RUN_SUITE( suite ) \
+	do { \
+		if ( g_context.filteredSuite ) { \
+			if ( strcmp( g_context.filteredSuite, #suite ) == 0 ) { \
+				NE_TEST_RUN_SUITE_INTERNAL( suite ); \
+			} \
+		} else { \
+			NE_TEST_RUN_SUITE_INTERNAL( suite ); \
+		} \
+	} while ( 0 )
+
 #define NE_TEST( name )			neTestResult_t (name)( void ); neTestResult_t (name)( void )
 #define NE_TEST_SUITE( name )	void (name)( void ); void (name)( void )
 
-#define NE_TEST_RUN_TEST( test ) \
+#define NE_TEST_RUN_TEST_INTERNAL( test ) \
 	do { \
 		if ( g_context.testFuncStart ) { \
 			g_context.testFuncStart( g_context.testFuncStartData ); \
 		} \
 \
-		neTestResult_t result = test(); \
+		result = test(); \
 \
 		if ( g_context.testFuncEnd ) { \
 			g_context.testFuncEnd( g_context.testFuncEndData ); \
 		} \
+	} while ( 0 )
+
+#define NE_TEST_RUN_TEST( test ) \
+	do { \
+		if ( ( ( g_context.flags & NE_TEST_FLAGS_ABORT_ON_FAIL ) == 0 ) || g_context.numFailed == 0 ) { \
+			neTestResult_t result = NE_TEST_RESULT_SKIPPED; \
+			if ( g_context.filteredTest ) { \
+				if ( strcmp( g_context.filteredTest, #test ) == 0 ) { \
+					NE_TEST_RUN_TEST_INTERNAL( test ); \
+				} \
+			} else { \
+				NE_TEST_RUN_TEST_INTERNAL( test ); \
+			} \
 \
-		switch ( result ) { \
-			case NE_TEST_RESULT_PASSED: \
-				NE_Test_SetTextColor( NE_TEST_COLOR_GREEN ); \
-				printf( "	PASSED:" ); \
-				NE_Test_SetTextColor( NE_TEST_COLOR_DEFAULT ); \
-				printf( "  %s.\n", #test ); \
-				break; \
+			switch ( result ) { \
+				case NE_TEST_RESULT_PASSED: { \
+					NE_Test_SetTextColor( NE_TEST_COLOR_GREEN ); \
+					printf( "	PASSED:" ); \
+					NE_Test_SetTextColor( NE_TEST_COLOR_DEFAULT ); \
+					printf( "  %s.\n", #test ); \
+					break; \
+				} \
 \
-			case NE_TEST_RESULT_FAILED: \
-				NE_Test_SetTextColor( NE_TEST_COLOR_RED ); \
-				printf( "	FAILED:" ); \
-				NE_Test_SetTextColor( NE_TEST_COLOR_YELLOW ); \
-				printf( "  %s: \"%s\" at %s:%d.\n", #test, g_context.msg, g_context.file, g_context.line ); \
-				NE_Test_SetTextColor( NE_TEST_COLOR_DEFAULT ); \
-				break; \
+				case NE_TEST_RESULT_FAILED: { \
+					NE_Test_SetTextColor( NE_TEST_COLOR_RED ); \
+					printf( "	FAILED:" ); \
+					NE_Test_SetTextColor( NE_TEST_COLOR_YELLOW ); \
+					printf( "  %s: \"%s\" at %s:%d.\n", #test, g_context.msg, g_context.file, g_context.line ); \
+					NE_Test_SetTextColor( NE_TEST_COLOR_DEFAULT ); \
+					break; \
+				} \
 \
-			case NE_TEST_RESULT_SKIPPED: \
-				/* skipped is handled differently */ \
-				break; \
+				case NE_TEST_RESULT_SKIPPED: \
+					/* skipped is handled differently */ \
+					break; \
+			} \
 		} \
 	} while ( 0 )
 
 #define NE_TEST_SKIP_TEST( test, reasonMsg ) \
 	do { \
-		printf( "	SKIPPED: %s: \"%s\".\n", #test, reasonMsg ); \
-		g_context.numSkipped++; \
+		if ( ( ( g_context.flags & NE_TEST_FLAGS_ABORT_ON_FAIL ) == 0 ) || g_context.numFailed == 0 ) { \
+			if ( g_context.filteredTest ) { \
+				if ( strcmp( g_context.filteredTest, #test ) == 0 ) { \
+					printf( "	SKIPPED: %s: \"%s\".\n", #test, reasonMsg ); \
+					g_context.numSkipped++; \
+				} \
+			} else { \
+				printf( "	SKIPPED: %s: \"%s\".\n", #test, reasonMsg ); \
+				g_context.numSkipped++; \
+			} \
+		} \
 	} while ( 0 )
 
 #define NE_TEST_EXPECT_TRUE( condition ) \
