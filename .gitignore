@@ -15,7 +15,7 @@
 .vs/
 .vscode/
 x64/
-neon_test/
+temper/
 
 # other files
 *.bat
@@ -23,8 +23,7 @@ neon_test/
 *.code-workspace
 
 # build folders
-build/Debug/intermediate/
-build/Release/intermediate/
+build/
 
 # vim files
 *.un~
