@@ -104,9 +104,9 @@ Command Line Usage
 neon test supports a few command line options:
 
 ```
---help		: Shows the help in console.
--t <name>	: Only run the test with the given name.
--s <suite>	: Only run the suite with the given name.
--a			: Abort immediately on test failure.
--c			: Enable colored output.
+--help     : Shows the help in console.
+-t <name>  : Only run the test with the given name.
+-s <suite> : Only run the suite with the given name.
+-a         : Abort immediately on test failure.
+-c         : Enable colored output.
 ```
