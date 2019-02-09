@@ -38,7 +38,7 @@ NE_TEST_SUITE( TheSuite ) {
 	NE_TEST_RUN_TEST( XShouldEqual0 );
 	NE_TEST_RUN_TEST( XShouldEqual1 );
 	NE_TEST_RUN_TEST( XShouldEqual2 );
-	NE_TEST_SKIP_TEST( XShouldEqual3, "Flaky on various people's machines right now..." );
+	NE_TEST_SKIP_TEST( XShouldEqual3, "This is a \"skipping test\" test." );
 }
 
 int main( int argc, char** argv ) {
