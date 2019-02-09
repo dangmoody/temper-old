@@ -230,6 +230,9 @@ static neTestContext_t			g_context	= { 0 };
 
 #define NE_TEST_EXIT_CODE()		( ( g_context.numFailed == 0 ) ? 0 : 1 )
 
+#define NE_TEST( name )			neTestResult_t (name)( void ); neTestResult_t (name)( void )
+#define NE_TEST_SUITE( name )	void (name)( void ); void (name)( void )
+
 #define NE_TEST_SET_COMMAND_LINE_ARGS( argc, argv ) \
 	do { \
 		for ( int i = 0; i < argc; i++ ) { \
@@ -339,9 +342,6 @@ static neTestContext_t			g_context	= { 0 };
 			NE_TEST_RUN_SUITE_INTERNAL( suite ); \
 		} \
 	} while ( 0 )
-
-#define NE_TEST( name )			neTestResult_t (name)( void ); neTestResult_t (name)( void )
-#define NE_TEST_SUITE( name )	void (name)( void ); void (name)( void )
 
 #define NE_TEST_RUN_TEST_INTERNAL( test ) \
 	do { \
