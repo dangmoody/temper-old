@@ -13,8 +13,14 @@
 
 # VS project folders
 .vs/
+.vscode/
 x64/
 neon_test/
+
+# other files
+*.bat
+*.json
+*.code-workspace
 
 # build folders
 build/Debug/intermediate/
