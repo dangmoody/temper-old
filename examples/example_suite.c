@@ -1,4 +1,4 @@
-#include "neon_test.h"
+#include "../neon_test.h"
 
 #include <math.h>
 

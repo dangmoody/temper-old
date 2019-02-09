@@ -1,6 +1,6 @@
-#include <stdio.h>
+#include "../neon_test.h"
 
-#include "neon_test.h"
+#include <stdio.h>
 
 NE_TEST( XShouldEqualString0 ) {
 	const char* msg = "This is a string";
