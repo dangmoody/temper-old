@@ -211,7 +211,7 @@ static neTestContext_t			g_context	= { 0 };
 #define NE_TEST_SET_TEST_END_CALLBACK( callback, userdata ) \
 	do { \
 		g_context.testFuncEnd = callback; \
-		g_context.testFuncEndData = callback; \
+		g_context.testFuncEndData = userdata; \
 	} while ( 0 )
 
 #define NE_TEST_SET_SUITE_START_CALLBACK( callback, userdata ) \
