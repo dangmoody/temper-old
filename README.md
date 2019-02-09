@@ -25,7 +25,7 @@ Code Usage
 ----------
 neon test requires init and shutdown calls.  These can be done anywhere,
 but main() is recommended.  neon test also tracks the return code:
-```
+```C
 int main( int argc, char** argv ) {
 	NE_TEST_INIT();
 
@@ -38,7 +38,7 @@ int main( int argc, char** argv ) {
 ```
 
 To create a test:
-```
+```C
 NE_TEST( XShouldEqual0 ) {
 	float x = 0.0f;
 	NE_TEST_EXPECT_TRUE( floateq( x, 0.0f ) );
@@ -48,17 +48,17 @@ NE_TEST( XShouldEqual0 ) {
 ```
 
 The following assert-style macros are given; they do what you'd expect:
-* `NE_TEST_EXPECT_TRUE( condition );`
-* `NE_TEST_EXPECT_FALSE( condition );`
+* ```NE_TEST_EXPECT_TRUE( condition );```
+* ```NE_TEST_EXPECT_FALSE( condition );```
 
 The following macros are given for return results of a test; they do what
 you'd expect:
-* `NE_TEST_PASS();`
-* `NE_TEST_FAIL();`
+* ```NE_TEST_PASS();```
+* ```NE_TEST_FAIL();```
 
 In order to make a test suite that runs a series of tests:
 
-```
+```C
 NE_TEST_SUITE( TheSuite ) {
 	NE_TEST_RUN_TEST( XShouldEqual0 );
 	NE_TEST_RUN_TEST( SomeOtherTest );
@@ -70,21 +70,21 @@ Tests can be run in and outside a test-suite, just like greatest.
 
 If you want to skip a test:
 
-```
+```C
 NE_TEST_SKIP_TEST( FlakyTest, "TeamCity doesn't like this test for some reason..." );
 ```
 
 neon test will then mark the test as skipped and display the reason
 message in the console, for example:
 
-```
+```C
 SKIPPED: FlakyTest: "TeamCity doesn't like this test for some reason...".
 ```
 
 You can also specify callbacks to run before and after each test and suite
 is run:
 
-```
+```C
 // per suite
 NE_TEST_SET_SUITE_START_CALLBACK( OnSuiteStarting, userdata );
 NE_TEST_SET_SUITE_END_CALLBACK( OnSuiteEnded, userdata );
