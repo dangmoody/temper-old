@@ -180,7 +180,7 @@ bool						g_allPassed	= false;
 		return NE_TEST_RESULT_FAILED; \
 	} while ( 0 )
 
-#define NE_RUN_TEST_SUITE( suite )				suite()
+#define NE_TEST_RUN_SUITE( suite )				suite()
 
 #define NE_TEST( name )							neTestResult_t (name)( void ); neTestResult_t (name)( void )
 #define NE_TEST_SUITE( name )					void (name)( void ); void (name)( void )
@@ -202,6 +202,9 @@ bool						g_allPassed	= false;
 				NE_Test_SetTextColor( NE_TEST_COLOR_YELLOW ); \
 				printf( "  %s: \"%s\" at %s:%d.\n", #test, g_context->msg, g_context->file, g_context->line ); \
 				NE_Test_SetTextColor( NE_TEST_COLOR_DEFAULT ); \
+				break; \
+\
+			default: \
 				break; \
 		} \
 	} while ( 0 )

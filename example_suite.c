@@ -47,7 +47,7 @@ int main( int argc, char** argv ) {
 
 	NE_TEST_INIT();
 
-	NE_RUN_TEST_SUITE( TheSuite );
+	NE_TEST_RUN_SUITE( TheSuite );
 
 	NE_TEST_SHUTDOWN();
 
