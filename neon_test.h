@@ -1,16 +1,5 @@
 #pragma once
 
-#ifdef _WIN32
-#include <Windows.h>
-#endif
-
-#include <stdio.h>
-#include <malloc.h>
-#include <memory.h>
-
-#include <stdbool.h>
-#include <stdint.h>
-
 /*
 ===========================================================================
 
@@ -105,33 +94,49 @@ neon test also tracks the return code:
 ===========================================================================
 */
 
+#ifdef _WIN32
+#include <Windows.h>
+#endif
+
+#include <stdio.h>
+#include <malloc.h>
+#include <memory.h>
+
+#include <stdbool.h>
+#include <stdint.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 // TODO(DM): put back in
 // TODO(DM): mac, linux, etc.
-typedef enum consoleColor_t {
-#ifdef _WIN32
-	NE_TEST_COLOR_DEFAULT	= 0x07,
-	NE_TEST_COLOR_RED		= 0x0C,
-	NE_TEST_COLOR_GREEN		= 0x02,
-	NE_TEST_COLOR_BLUE		= 0x09,
-	NE_TEST_COLOR_YELLOW	= 0x0E,
-#endif
-} consoleColor_t;
+#if defined( _WIN32 )
+#define NE_TEST_COLOR_DEFAULT	0x07
+#define NE_TEST_COLOR_RED		0x0C
+#define NE_TEST_COLOR_GREEN		0x02
+#define NE_TEST_COLOR_YELLOW	0x0E
 
-void NE_Test_SetTextColor( const consoleColor_t color ) {
-#ifdef _WIN32
+typedef uint32_t				neTestConsoleColor_t;
+#elif defined( __linux__ )
+#define NE_TEST_COLOR_DEFAULT	"\x1B[0m"
+#define NE_TEST_COLOR_RED		"\x1B[31m"
+#define NE_TEST_COLOR_GREEN		"\x1B[32m"
+#define NE_TEST_COLOR_YELLOW	"\x1B[33m"
+
+typedef const char*				neTestConsoleColor_t;
+#endif
+
+void NE_Test_SetTextColor( const neTestConsoleColor_t color ) {
+#if defined( _WIN32 )
 	SetConsoleTextAttribute( GetStdHandle( STD_OUTPUT_HANDLE ), (WORD) color );
-#else
-	// TODO(DM): mac, linux, etc.
-	( (void) color );
+#elif defined( __linux__ )
+	printf( color );
 #endif
 }
 
 typedef enum neTestResult_t {
-	NE_TEST_RESULT_PASSED	= 0,
+	NE_TEST_RESULT_PASSED		= 0,
 	NE_TEST_RESULT_FAILED,
 	NE_TEST_RESULT_SKIPPED,
 } neTestResult_t;
@@ -139,17 +144,17 @@ typedef enum neTestResult_t {
 typedef neTestResult_t( *neTestFunc_t )( void );
 
 typedef struct neTestContext_t {
-	uint32_t				numPassed;
-	uint32_t				numFailed;
-	uint32_t				numSkipped;
+	uint32_t					numPassed;
+	uint32_t					numFailed;
+	uint32_t					numSkipped;
 
-	uint32_t				line;
-	const char*				file;
-	const char*				msg;
+	uint32_t					line;
+	const char*					file;
+	const char*					msg;
 } neTestContext_t;
 
-neTestContext_t				g_context	= { 0 };
-bool						g_allPassed	= true;
+neTestContext_t					g_context	= { 0 };
+bool							g_allPassed	= true;
 
 #define NE_TEST_INIT() \
 	do { \
@@ -161,7 +166,7 @@ bool						g_allPassed	= true;
 		printf( "\n%d tests run in total.  %d passed, %d failed, %d skipped.\n", totalTests, g_context.numPassed, g_context.numFailed, g_context.numSkipped ); \
 	} while ( 0 )
 
-#define NE_TEST_EXIT_CODE()						( g_allPassed ? 0 : 1 )
+#define NE_TEST_EXIT_CODE()		( g_allPassed ? 0 : 1 )
 
 #define NE_TEST_FAIL_TEST( fmt ) \
 	do { \
@@ -181,8 +186,8 @@ bool						g_allPassed	= true;
 		suite(); \
 	} while ( 0 )
 
-#define NE_TEST( name )							neTestResult_t (name)( void ); neTestResult_t (name)( void )
-#define NE_TEST_SUITE( name )					void (name)( void ); void (name)( void )
+#define NE_TEST( name )			neTestResult_t (name)( void ); neTestResult_t (name)( void )
+#define NE_TEST_SUITE( name )	void (name)( void ); void (name)( void )
 
 #define NE_TEST_RUN_TEST( test ) \
 	do { \
@@ -192,7 +197,7 @@ bool						g_allPassed	= true;
 				NE_Test_SetTextColor( NE_TEST_COLOR_GREEN ); \
 				printf( "	PASSED:" ); \
 				NE_Test_SetTextColor( NE_TEST_COLOR_DEFAULT ); \
-				printf( "  %s:\n", #test ); \
+				printf( "  %s.\n", #test ); \
 				break; \
 \
 			case NE_TEST_RESULT_FAILED: \
