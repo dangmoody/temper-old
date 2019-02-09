@@ -148,22 +148,17 @@ typedef struct neTestContext_t {
 	const char*				msg;
 } neTestContext_t;
 
-neTestContext_t*			g_context	= NULL;
-bool						g_allPassed	= false;
+neTestContext_t				g_context	= { 0 };
+bool						g_allPassed	= true;
 
 #define NE_TEST_INIT() \
 	do { \
-		g_context = (neTestContext_t*) malloc( sizeof( neTestContext_t ) ); \
-		memset( g_context, 0, sizeof( neTestContext_t ) ); \
 	} while ( 0 )
 
 #define NE_TEST_SHUTDOWN() \
 	do { \
-		uint32_t totalTests = g_context->numPassed + g_context->numFailed + g_context->numSkipped; \
-		printf( "\n%d tests run in total.  %d passed, %d failed, %d skipped.\n", totalTests, g_context->numPassed, g_context->numFailed, g_context->numSkipped ); \
-\
-		free( g_context ); \
-		g_context = NULL; \
+		uint32_t totalTests = g_context.numPassed + g_context.numFailed + g_context.numSkipped; \
+		printf( "\n%d tests run in total.  %d passed, %d failed, %d skipped.\n", totalTests, g_context.numPassed, g_context.numFailed, g_context.numSkipped ); \
 	} while ( 0 )
 
 #define NE_TEST_EXIT_CODE()						( g_allPassed ? 0 : 1 )
@@ -172,15 +167,19 @@ bool						g_allPassed	= false;
 	do { \
 		g_allPassed = false; \
 \
-		g_context->file = __FILE__; \
-		g_context->line = __LINE__; \
-		g_context->msg = (fmt); \
+		g_context.file = __FILE__; \
+		g_context.line = __LINE__; \
+		g_context.msg = (fmt); \
 \
-		g_context->numFailed++; \
+		g_context.numFailed++; \
+\
 		return NE_TEST_RESULT_FAILED; \
 	} while ( 0 )
 
-#define NE_TEST_RUN_SUITE( suite )				suite()
+#define NE_TEST_RUN_SUITE( suite ) \
+	do { \
+		suite(); \
+	} while ( 0 )
 
 #define NE_TEST( name )							neTestResult_t (name)( void ); neTestResult_t (name)( void )
 #define NE_TEST_SUITE( name )					void (name)( void ); void (name)( void )
@@ -200,7 +199,7 @@ bool						g_allPassed	= false;
 				NE_Test_SetTextColor( NE_TEST_COLOR_RED ); \
 				printf( "	FAILED:" ); \
 				NE_Test_SetTextColor( NE_TEST_COLOR_YELLOW ); \
-				printf( "  %s: \"%s\" at %s:%d.\n", #test, g_context->msg, g_context->file, g_context->line ); \
+				printf( "  %s: \"%s\" at %s:%d.\n", #test, g_context.msg, g_context.file, g_context.line ); \
 				NE_Test_SetTextColor( NE_TEST_COLOR_DEFAULT ); \
 				break; \
 \
@@ -212,12 +211,12 @@ bool						g_allPassed	= false;
 #define NE_TEST_SKIP_TEST( test, reasonMsg ) \
 	do { \
 		printf( "	SKIPPED: %s: \"%s\".\n", #test, reasonMsg ); \
-		g_context->numSkipped++; \
+		g_context.numSkipped++; \
 	} while ( 0 )
 
 #define NE_TEST_EXPECT_TRUE( condition ) \
 	do { \
-		g_context->msg = NULL; \
+		g_context.msg = NULL; \
 		if ( !(condition) ) { \
 			NE_TEST_FAIL_TEST( #condition ); \
 		} \
@@ -225,7 +224,7 @@ bool						g_allPassed	= false;
 
 #define NE_TEST_EXPECT_FALSE( condition ) \
 	do { \
-		g_context->msg = NULL; \
+		g_context.msg = NULL; \
 		if ( (condition) ) { \
 			NE_TEST_FAIL_TEST( #condition ); \
 		} \
@@ -233,13 +232,13 @@ bool						g_allPassed	= false;
 
 #define NE_TEST_PASS() \
 	do { \
-		g_context->numPassed++; \
+		g_context.numPassed++; \
 		return NE_TEST_RESULT_PASSED; \
 	} while ( 0 )
 
 #define NE_TEST_FAIL() \
 	do { \
-		g_context->numFailed++; \
+		g_context.numFailed++; \
 		return NE_TEST_RESULT_FAILED; \
 	} while ( 0 )
 
