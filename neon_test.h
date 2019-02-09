@@ -30,7 +30,8 @@ SOFTWARE.
 CONTENTS:
 	1. INTRO
 	2. INSTALLATION
-	3. USAGE
+	3. CODE USAGE
+	4. COMMAND LINE USAGE
 
 
 1. INTRO:
@@ -44,7 +45,7 @@ different in usage.
 Include "neon_test.h" in your project and you're good to go.
 
 
-3. USAGE:
+3. CODE USAGE:
 neon test requires init and shutdown calls.  These can be done anywhere,
 but main() is recommended.  neon test also tracks the return code:
 
@@ -108,6 +109,16 @@ The start callback gets called before just the test/suite runs and the end
 callback gets called just as the test/suite has finished running, before the
 console output.  Both callbacks return void and take void* as arguments so
 you may pass through them whatever you like.
+
+
+4. COMMAND LINE USAGE:
+neon test supports a few command line options:
+
+	--help		: Shows the help in console.
+	-t <name>	: Only run the test with the given name.
+	-s <suite>	: Only run the suite with the given name.
+	-a			: Abort immediately on test failure.
+	-c			: Enable colored output.
 
 ===========================================================================
 */
@@ -213,7 +224,7 @@ static void NE_Test_ShowUsage( void ) {
 		"neon test:\n"
 		"Usage:\n"
 		"\n"
-		"\thelp       : Shows this help.\n"
+		"\t--help     : Shows this help.\n"
 		"\t-t <name>  : Only run the test with the given name.\n"
 		"\t-s <suite> : Only run the suite with the given name.\n"
 		"\t-a         : Abort immediately on test failure.\n"
