@@ -1,0 +1,25 @@
+# VS files
+*.sln
+*.vcxproj
+*.vcxproj.*
+*.exe
+*.pdb
+*.ilk
+*.obj
+*.log
+*.idb
+*.tlog
+*.lastbuildstate
+
+# VS project folders
+.vs/
+x64/
+neon_test/
+
+# build folders
+build/Debug/intermediate/
+build/Release/intermediate/
+
+# vim files
+*.un~
+*.*~
