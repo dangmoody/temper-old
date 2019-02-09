@@ -28,14 +28,19 @@ SOFTWARE.
 
 
 TODO(DM):
-	- test & suite start/end callbacks
 	- select specific tests via cmd arg
+
+CONTENTS:
+	1. INTRO
+	2. INSTALLATION
+	3. USAGE
 
 
 1. INTRO:
 neon test is a single-header test framework written in C99 for use in your
 C or C++ programs.  It is based on "greatest":
-https://github.com/silentbicycle/greatest except it is slightly different.
+https://github.com/silentbicycle/greatest except it is slightly
+different in usage.
 
 
 2. INSTALLATION:
@@ -76,7 +81,9 @@ If you want to skip a test:
 	NE_TEST_SKIP_TEST( FlakyTest, "TeamCity doesn't like this test for some reason..." );
 
 neon test will then mark the test as skipped and display the reason
-message.
+message in the console, for example:
+
+	SKIPPED: FlakyTest: "TeamCity doesn't like this test for some reason...".
 
 neon test also tracks the return code:
 
@@ -89,6 +96,20 @@ neon test also tracks the return code:
 
 		return NE_TEST_EXIT_CODE();
 	}
+
+You can also specify callbacks to run before and after each test and suite
+is run:
+
+	NE_TEST_SET_SUITE_START_CALLBACK( OnSuiteStarting, userdata );
+	NE_TEST_SET_SUITE_END_CALLBACK( OnSuiteEnded, userdata );
+
+	NE_TEST_SET_TEST_START_CALLBAK( OnTestStarting, userdata );
+	NE_TEST_SET_TEST_START_CALLBAK( OnTestEnded, userdata );
+
+The start callback gets called before just the test/suite runs and the end
+callback gets called just as the test/suite has finished running, before the
+console output.  Both callbacks return void and take void* as arguments so
+you may pass through them whatever you like.
 
 ===========================================================================
 */
@@ -142,7 +163,21 @@ typedef enum neTestResult_t {
 
 typedef neTestResult_t( *neTestFunc_t )( void );
 
+typedef void( *testCallback_t )( void* userdata );
+
 typedef struct neTestContext_t {
+	void*						suiteFuncStartData;
+	void*						suiteFuncEndData;
+
+	void*						testFuncStartData;
+	void*						testFuncEndData;
+
+	testCallback_t				suiteFuncStart;
+	testCallback_t				suiteFuncEnd;
+
+	testCallback_t				testFuncStart;
+	testCallback_t				testFuncEnd;
+
 	uint32_t					numPassed;
 	uint32_t					numFailed;
 	uint32_t					numSkipped;
@@ -152,11 +187,11 @@ typedef struct neTestContext_t {
 	const char*					msg;
 } neTestContext_t;
 
-neTestContext_t					g_context	= { 0 };
-bool							g_allPassed	= true;
+static neTestContext_t			g_context	= { 0 };
 
 #define NE_TEST_INIT() \
 	do { \
+		memset( &g_context, 0, sizeof( neTestContext_t ) ); \
 	} while ( 0 )
 
 #define NE_TEST_SHUTDOWN() \
@@ -165,12 +200,34 @@ bool							g_allPassed	= true;
 		printf( "\n%d tests run in total.  %d passed, %d failed, %d skipped.\n", totalTests, g_context.numPassed, g_context.numFailed, g_context.numSkipped ); \
 	} while ( 0 )
 
-#define NE_TEST_EXIT_CODE()		( g_allPassed ? 0 : 1 )
+#define NE_TEST_EXIT_CODE()		( ( g_context.numFailed == 0 ) ? 0 : 1 )
+
+#define NE_TEST_SET_TEST_START_CALLBACK( callback, userdata ) \
+	do { \
+		g_context.testFuncStart = callback; \
+		g_context.testFuncStartData = userdata; \
+	} while ( 0 )
+
+#define NE_TEST_SET_TEST_END_CALLBACK( callback, userdata ) \
+	do { \
+		g_context.testFuncEnd = callback; \
+		g_context.testFuncEndData = callback; \
+	} while ( 0 )
+
+#define NE_TEST_SET_SUITE_START_CALLBACK( callback, userdata ) \
+	do { \
+		g_context.suiteFuncStart = callback; \
+		g_context.suiteFuncStartData = userdata; \
+	} while ( 0 )
+
+#define NE_TEST_SET_SUITE_END_CALLBACK( callback, userdata ) \
+	do { \
+		g_context.suiteFuncEnd = callback; \
+		g_context.suiteFuncEndData = userdata; \
+	} while ( 0 )
 
 #define NE_TEST_FAIL_TEST( fmt ) \
 	do { \
-		g_allPassed = false; \
-\
 		g_context.file = __FILE__; \
 		g_context.line = __LINE__; \
 		g_context.msg = (fmt); \
@@ -182,7 +239,15 @@ bool							g_allPassed	= true;
 
 #define NE_TEST_RUN_SUITE( suite ) \
 	do { \
+		if ( g_context.suiteFuncStart ) { \
+			g_context.suiteFuncStart( g_context.suiteFuncStartData ); \
+		} \
+\
 		suite(); \
+\
+		if ( g_context.suiteFuncEnd ) { \
+			g_context.suiteFuncEnd( g_context.suiteFuncEndData ); \
+		} \
 	} while ( 0 )
 
 #define NE_TEST( name )			neTestResult_t (name)( void ); neTestResult_t (name)( void )
@@ -190,7 +255,16 @@ bool							g_allPassed	= true;
 
 #define NE_TEST_RUN_TEST( test ) \
 	do { \
+		if ( g_context.testFuncStart ) { \
+			g_context.testFuncStart( g_context.testFuncStartData ); \
+		} \
+\
 		neTestResult_t result = test(); \
+\
+		if ( g_context.testFuncEnd ) { \
+			g_context.testFuncEnd( g_context.testFuncEndData ); \
+		} \
+\
 		switch ( result ) { \
 			case NE_TEST_RESULT_PASSED: \
 				NE_Test_SetTextColor( NE_TEST_COLOR_GREEN ); \
@@ -207,7 +281,8 @@ bool							g_allPassed	= true;
 				NE_Test_SetTextColor( NE_TEST_COLOR_DEFAULT ); \
 				break; \
 \
-			default: \
+			case NE_TEST_RESULT_SKIPPED: \
+				/* skipped is handled differently */ \
 				break; \
 		} \
 	} while ( 0 )
