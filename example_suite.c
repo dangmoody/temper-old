@@ -75,7 +75,7 @@ int main( int argc, char** argv ) {
 	// this is just to demo the callbacks
 	NE_TEST_SET_SUITE_START_CALLBACK( OnSuiteStarting, NULL );
 	NE_TEST_SET_SUITE_END_CALLBACK( OnSuiteEnded, NULL );
-	
+
 	NE_TEST_SET_TEST_START_CALLBACK( OnTestStarting, NULL );
 	NE_TEST_SET_TEST_END_CALLBACK( OnTestEnded, NULL );
 

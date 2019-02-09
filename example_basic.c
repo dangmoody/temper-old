@@ -24,6 +24,9 @@ NE_TEST( XShouldEqualString2 ) {
 }
 
 int main( int argc, char** argv ) {
+	( (void) argc );
+	( (void) argv );
+
 	NE_TEST_INIT();
 
 	NE_TEST_RUN_TEST( XShouldEqualString0 );
