@@ -3,7 +3,19 @@
 #include <math.h>
 
 inline bool floateq( const float a, const float b ) {
-	return fabs( a - b ) < 1e-5;
+	return fabsf( a - b ) < 1e-5f;
+}
+
+void OnSuiteStarting( void* data ) {
+	( (void) data );
+
+	printf( "About to run a test suite.\n" );
+}
+
+void OnSuiteEnded( void* data ) {
+	( (void) data );
+
+	printf( "Test suite finished.\n" );
 }
 
 NE_TEST( XShouldEqual0 ) {
@@ -46,6 +58,9 @@ int main( int argc, char** argv ) {
 	( (void) argv );
 
 	NE_TEST_INIT();
+
+	NE_TEST_SET_SUITE_START_CALLBACK( OnSuiteStarting, NULL );
+	NE_TEST_SET_SUITE_END_CALLBACK( OnSuiteEnded, NULL );
 
 	NE_TEST_RUN_SUITE( TheSuite );
 
