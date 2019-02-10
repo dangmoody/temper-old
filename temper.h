@@ -103,13 +103,12 @@ In order to make a test suite that runs a series of tests:
 Tests can be run in and outside a test suite, just like greatest.
 
 You can also forward declare tests and suites:
-```C
-// forward declare a suite
-TEMPER_SUITE_EXTERN( TheSuite );
 
-// forward declare a test
-TEMPER_TEST_EXTERN( XShouldEqual0 );
-```
+	// forward declare a suite
+	TEMPER_SUITE_EXTERN( TheSuite );
+
+	// forward declare a test
+	TEMPER_TEST_EXTERN( XShouldEqual0 );
 
 If you want to skip a test:
 
