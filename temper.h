@@ -6,7 +6,7 @@
 Temper.
 
 Distributed under MIT License:
-Copyright (c) 2019 Dan Moody
+Copyright (c) 2019 Dan Moody (daniel.guy.moody@gmail.com)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -27,6 +27,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 
+TODO(DM):
+	- verbose logging flag
+	- stats per test-suite
+
+
 CONTENTS:
 	1. INTRO
 	2. INSTALLATION
@@ -36,9 +41,12 @@ CONTENTS:
 
 1. INTRO:
 Temper is a single-header test framework written in C99 for use in your
-C or C++ programs.  It is based on "greatest":
+C or C++ programs.  It is heavily based on "greatest":
 https://github.com/silentbicycle/greatest except it is slightly
 different in usage.
+
+Go and show the author of greatest some love - I would probably have
+never written this library without seeing greatest or how it works.
 
 
 2. INSTALLATION:
@@ -46,18 +54,21 @@ Include "temper.h" in your project and you're good to go.
 
 
 3. CODE USAGE:
-Temper requires init and shutdown calls.  These can be done anywhere,
-but main() is recommended.  Temper also tracks the return code:
+Temper requires only one call to setup "defs".  These must be in the same
+file as main().  Temper also tracks the return code:
+
+	TEMPER_DEFS();
 
 	int main( int argc, char** argv ) {
-		TEMPER_INIT();
+		// do your tests, suites, whatever
 
-		// do your tests...
-
-		TEMPER_SHUTDOWN();
+		TEMPER_SHOW_STATS();
 
 		return TEMPER_EXIT_CODE();
 	}
+
+TEMPER_SHOW_STATS(); prints the stats on passed, failed, and skipped
+tests.
 
 To create a test:
 
@@ -67,6 +78,10 @@ To create a test:
 
 		TEMPER_PASS();
 	}
+
+To then run that test:
+
+	TEMPER_RUN_TEST( XShouldEqual0 );
 
 The following assert-style macros are given; they do what you'd expect:
 	- TEMPER_EXPECT_TRUE( condition );
@@ -85,7 +100,16 @@ In order to make a test suite that runs a series of tests:
 		TEMPER_RUN_TEST( SomeOtherOtherTest );
 	}
 
-Tests can be run in and outside a test-suite, just like greatest.
+Tests can be run in and outside a test suite, just like greatest.
+
+You can also forward declare tests and suites:
+```C
+// forward declare a suite
+TEMPER_SUITE_EXTERN( TheSuite );
+
+// forward declare a test
+TEMPER_TEST_EXTERN( XShouldEqual0 );
+```
 
 If you want to skip a test:
 
@@ -123,6 +147,25 @@ Temper supports a few command line options:
 	-a			: Abort immediately on test failure.
 	-c			: Enable colored output.
 
+These settings can also be configured via user functions.
+
+If you don't want to set these options via command line and instead do it
+via code, you can do that.  Temper has flags that you can set (temperFlags_t):
+
+	// enable color output
+	TEMPER_TURN_FLAG_ON( TEMPER_FLAG_COLORS );
+
+	// disable immediate abort on first fail
+	TEMPER_TURN_FLAG_OFF( TEMPER_FLAG_ABORT_ON_FAIL );
+
+And to filter tests without command line args:
+
+	// only run this suite, and no others
+	TEMPER_FILTER_SUITE( TheSuite );
+
+	// only run this test
+	TEMPER_FILTER_TEST( XShouldEqual0 );
+
 ===========================================================================
 */
 
@@ -131,10 +174,8 @@ Temper supports a few command line options:
 #endif
 
 #include <stdio.h>
-#include <malloc.h>
 #include <memory.h>
 
-#include <stdbool.h>
 #include <stdint.h>
 
 #ifdef __cplusplus
@@ -157,11 +198,11 @@ typedef uint32_t					temperTestConsoleColor_t;
 typedef const char*					temperTestConsoleColor_t;
 #endif
 
-typedef enum temperTestFlagBits_t {
+typedef uint32_t temperFlags_t;
+typedef enum temperFlagBits_t {
 	TEMPER_FLAGS_ABORT_ON_FAIL		= 1ULL << 1,	// stop testing immediately after a test fails
 	TEMPER_FLAGS_COLORS				= 1ULL << 2,	// output to console with colors
-} temperTestFlagBits_t;
-typedef uint32_t temperTestFlags_t;
+} temperFlagBits_t;
 
 typedef enum temperTestResult_t {
 	TEMPER_RESULT_PASSED			= 0,
@@ -169,7 +210,7 @@ typedef enum temperTestResult_t {
 	TEMPER_RESULT_SKIPPED,
 } temperTestResult_t;
 
-typedef temperTestResult_t( *temperTestFunc_t )( void );
+typedef void( *temperSuiteFunc_t )( void );
 
 typedef void( *temperTestCallback_t )( void* userdata );
 
@@ -190,7 +231,7 @@ typedef struct temperTestContext_t {
 	uint32_t						numFailed;
 	uint32_t						numSkipped;
 
-	temperTestFlags_t				flags;
+	temperFlags_t					flags;
 
 	uint32_t						line;
 	const char*						file;
@@ -200,8 +241,35 @@ typedef struct temperTestContext_t {
 	const char*						filteredSuite;
 } temperTestContext_t;
 
-static temperTestContext_t			g_testContext	= { 0 };
+extern temperTestContext_t			g_testContext;
 
+#define TEMPER_DEFS() \
+	temperTestContext_t				g_testContext	= { 0 }
+
+// returns the program exit code according to Temper
+#define TEMPER_EXIT_CODE()			( ( g_testContext.numFailed == 0 ) ? 0 : 1 )
+
+// forward declare a test suite
+#define TEMPER_SUITE_EXTERN( name )	void (name)( void )
+
+// defines a test suite (with your code)
+#define TEMPER_SUITE( name )		void (name)( void )
+
+// forward declare a test
+#define TEMPER_TEST_EXTERN( name )	temperTestResult_t (name)( void )
+
+// defines a test (with your code)
+#define TEMPER_TEST( name )			temperTestResult_t (name)( void )
+
+// clang with -Wpedantic claims these functions aren't used
+// so just ignore that here, we know they are under the right circumstances
+#if defined( __clang__ )
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-function"
+#elif defined( __GNUC__ )
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-function"
+#endif
 static void TemperSetTextColorInternal( const temperTestConsoleColor_t color ) {
 	if ( ( g_testContext.flags & TEMPER_FLAGS_COLORS ) == 0 ) {
 		return;
@@ -214,10 +282,6 @@ static void TemperSetTextColorInternal( const temperTestConsoleColor_t color ) {
 #endif
 }
 
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-function"
-#endif
 static const char* TemperGetNextArgInternal( const int argIndex, const int argc, char** argv ) {
 	return ( argIndex + 1 < argc ) ? argv[argIndex + 1] : NULL;
 }
@@ -234,46 +298,45 @@ static void TemperShowUsageInternal( void ) {
 		"\t-c         : Enable colored output.\n"
 	);
 }
-#ifdef __clang__
+#if defined( __clang__ )
 #pragma clang diagnostic pop
+#elif defined( __GNUC__ )
+#pragma GCC diagnostic pop
 #endif
 
-#define TEMPER_INIT() \
-	do { \
-		memset( &g_testContext, 0, sizeof( temperTestContext_t ) ); \
-	} while ( 0 )
-
-#define TEMPER_SHUTDOWN() \
+// get the stats from temper on passed, failed, and skipped tests
+// you'll probably only want to display this at the end of your test program
+#define TEMPER_SHOW_STATS() \
 	do { \
 		uint32_t totalTests = g_testContext.numPassed + g_testContext.numFailed + g_testContext.numSkipped; \
 		printf( "\n%d tests run in total.  %d passed, %d failed, %d skipped.\n", totalTests, g_testContext.numPassed, g_testContext.numFailed, g_testContext.numSkipped ); \
 	} while ( 0 )
 
-#define TEMPER_EXIT_CODE()			( ( g_testContext.numFailed == 0 ) ? 0 : 1 )
-
-#define TEMPER_TEST( name )			temperTestResult_t (name)( void ); temperTestResult_t (name)( void )
-#define TEMPER_SUITE( name )		void (name)( void ); void (name)( void )
-
+// enable one or more temperFlags_t
 #define TEMPER_TURN_FLAG_ON( flag ) \
 	do { \
 		g_testContext.flags |= (flag); \
 	} while ( 0 )
 
+// disable one or more temperFlags_t
 #define TEMPER_TURN_FLAG_OFF( flag ) \
 	do { \
 		g_testContext.flags &= ~(flag); \
 	} while ( 0 )
 
+// makes Temper only run the test suite with the given name
 #define TEMPER_FILTER_SUITE( suiteName ) \
 	do { \
 		g_testContext.filteredSuite = suiteName; \
 	} while ( 0 )
 
+// makes Temper only run the test with the given name
 #define TEMPER_FILTER_TEST( testName ) \
 	do { \
 		g_testContext.filteredTest = testName; \
 	} while ( 0 )
 
+// set Temper's command line args (and therefore settings) in one go
 // this call is optional
 // you can also call various functions in Temper to do the same things
 #define TEMPER_SET_COMMAND_LINE_ARGS( argc, argv ) \
@@ -328,31 +391,35 @@ static void TemperShowUsageInternal( void ) {
 		} \
 	} while ( 0 )
 
+// set the function that will get called just before a test starts
 #define TEMPER_SET_TEST_START_CALLBACK( callback, userdata ) \
 	do { \
 		g_testContext.testFuncStart = callback; \
 		g_testContext.testFuncStartData = userdata; \
 	} while ( 0 )
 
+// set the function that will get called just after a test ends and before console output
 #define TEMPER_SET_TEST_END_CALLBACK( callback, userdata ) \
 	do { \
 		g_testContext.testFuncEnd = callback; \
 		g_testContext.testFuncEndData = userdata; \
 	} while ( 0 )
 
+// set the function that will get called just before a test suite starts
 #define TEMPER_SET_SUITE_START_CALLBACK( callback, userdata ) \
 	do { \
 		g_testContext.suiteFuncStart = callback; \
 		g_testContext.suiteFuncStartData = userdata; \
 	} while ( 0 )
 
+// set the function that will get called just after a test suite ends and before console output
 #define TEMPER_SET_SUITE_END_CALLBACK( callback, userdata ) \
 	do { \
 		g_testContext.suiteFuncEnd = callback; \
 		g_testContext.suiteFuncEndData = userdata; \
 	} while ( 0 )
 
-#define TEMPER_FAIL_TEST( fmt ) \
+#define TEMPER_FAIL_TEST_INTERNAL( fmt ) \
 	do { \
 		g_testContext.file = __FILE__; \
 		g_testContext.line = __LINE__; \
@@ -376,6 +443,7 @@ static void TemperShowUsageInternal( void ) {
 		} \
 	} while ( 0 )
 
+// runs the test suite
 #define TEMPER_RUN_SUITE( suite ) \
 	do { \
 		if ( g_testContext.filteredSuite ) { \
@@ -400,6 +468,7 @@ static void TemperShowUsageInternal( void ) {
 		} \
 	} while ( 0 )
 
+// runs the test
 #define TEMPER_RUN_TEST( test ) \
 	do { \
 		if ( ( ( g_testContext.flags & TEMPER_FLAGS_ABORT_ON_FAIL ) == 0 ) || g_testContext.numFailed == 0 ) { \
@@ -443,8 +512,11 @@ static void TemperShowUsageInternal( void ) {
 		g_testContext.numSkipped++; \
 	} while ( 0 )
 
+// marks this test to be skipped
+// the test will still be outputted to console, but it will not actually run
 #define TEMPER_SKIP_TEST( test, reasonMsg ) \
 	do { \
+		( (void) test ); \
 		if ( ( ( g_testContext.flags & TEMPER_FLAGS_ABORT_ON_FAIL ) == 0 ) || g_testContext.numFailed == 0 ) { \
 			if ( g_testContext.filteredTest ) { \
 				if ( strcmp( g_testContext.filteredTest, #test ) == 0 ) { \
@@ -456,28 +528,32 @@ static void TemperShowUsageInternal( void ) {
 		} \
 	} while ( 0 )
 
+// fails the test if the condition is not true
 #define TEMPER_EXPECT_TRUE( condition ) \
 	do { \
 		g_testContext.msg = NULL; \
 		if ( !(condition) ) { \
-			TEMPER_FAIL_TEST( #condition ); \
+			TEMPER_FAIL_TEST_INTERNAL( #condition ); \
 		} \
 	} while ( 0 )
 
+// fails the test if the condition is not false
 #define TEMPER_EXPECT_FALSE( condition ) \
 	do { \
 		g_testContext.msg = NULL; \
 		if ( (condition) ) { \
-			TEMPER_FAIL_TEST( #condition ); \
+			TEMPER_FAIL_TEST_INTERNAL( #condition ); \
 		} \
 	} while ( 0 )
 
+// exit the test, telling temper that the test has passed
 #define TEMPER_PASS() \
 	do { \
 		g_testContext.numPassed++; \
 		return TEMPER_RESULT_PASSED; \
 	} while ( 0 )
 
+// exit the test, telling temper that the test has failed
 #define TEMPER_FAIL() \
 	do { \
 		g_testContext.numFailed++; \

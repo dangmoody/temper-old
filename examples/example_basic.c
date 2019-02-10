@@ -23,16 +23,16 @@ TEMPER_TEST( XShouldEqualString2 ) {
 	TEMPER_PASS();
 }
 
-int main( int argc, char** argv ) {
-	TEMPER_INIT();
+TEMPER_DEFS();
 
+int main( int argc, char** argv ) {
 	TEMPER_SET_COMMAND_LINE_ARGS( argc, argv );
 
 	TEMPER_RUN_TEST( XShouldEqualString0 );
 	TEMPER_SKIP_TEST( XShouldEqualString1, "Test skipping test not in a suite." );
 	TEMPER_RUN_TEST( XShouldEqualString2 );
 
-	TEMPER_SHUTDOWN();
+	TEMPER_SHOW_STATS();
 
 	return TEMPER_EXIT_CODE();
 }

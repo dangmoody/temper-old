@@ -3,13 +3,17 @@
 #include <stdio.h>
 
 TEMPER_SUITE_EXTERN( TheSuite );
+TEMPER_TEST_EXTERN( XShouldEqual0 );
 
 TEMPER_DEFS();
 
 int main( int argc, char** argv ) {
-	TEMPER_SET_COMMAND_LINE_ARGS( argc, argv );
+	( (void) argc );
+	( (void) argv );
 
 	TEMPER_RUN_SUITE( TheSuite );
+	printf( "So far: %d\n", g_testContext.numPassed );
+	TEMPER_RUN_TEST( XShouldEqual0 );
 
 	TEMPER_SHOW_STATS();
 
