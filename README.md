@@ -6,7 +6,7 @@ Based on [greatest](https://github.com/silentbicycle/greatest).  Go show the aut
 
 Distributed under MIT License.  See LICENSE file for details.
 
-Documentation is covered in this README and in the header comment in the main header file.
+Documentation is covered in this README and in the main comment at the top of the header.
 
 
 Another testing framework?
@@ -98,6 +98,9 @@ The start callback gets called before just the test/suite runs and the end
 callback gets called just as the test/suite has finished running, before the
 console output.  Both callbacks return void and take `void*` as arguments so
 you may pass through them whatever you like.
+
+Any functions with "Internal" in the name means you probably shouldn't go
+touching it.
 
 Command Line Usage
 ------------------
