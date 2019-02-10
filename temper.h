@@ -209,8 +209,6 @@ typedef enum temperTestResult_t {
 	TEMPER_RESULT_SKIPPED,
 } temperTestResult_t;
 
-typedef void( *temperSuiteFunc_t )( void );
-
 typedef void( *temperTestCallback_t )( void* userdata );
 
 typedef struct temperTestContext_t {
