@@ -57,7 +57,6 @@ you'd expect:
 * ```TEMPER_FAIL();```
 
 In order to make a test suite that runs a series of tests:
-
 ```C
 TEMPER_SUITE( TheSuite ) {
 	TEMPER_RUN_TEST( XShouldEqual0 );
@@ -68,22 +67,28 @@ TEMPER_SUITE( TheSuite ) {
 
 Tests can be run in and outside a test-suite, just like greatest.
 
-If you want to skip a test:
+You can also forward declare tests and suites:
+```C
+// forward declare a suite
+TEMPER_SUITE_EXTERN( TheSuite );
 
+// forward declare a test
+TEMPER_TEST_EXTERN( XShouldEqual0 );
+```
+
+If you want to skip a test:
 ```C
 TEMPER_SKIP_TEST( FlakyTest, "TeamCity doesn't like this test for some reason..." );
 ```
 
 Temper will then mark the test as skipped and display the reason
 message in the console, for example:
-
 ```C
 SKIPPED: FlakyTest: "TeamCity doesn't like this test for some reason...".
 ```
 
 You can also specify callbacks to run before and after each test and suite
 is run:
-
 ```C
 // per suite
 TEMPER_SET_SUITE_START_CALLBACK( OnSuiteStarting, userdata );
@@ -112,4 +117,23 @@ Temper supports a few command line options:
 -s <suite> : Only run the suite with the given name.
 -a         : Abort immediately on test failure.
 -c         : Enable colored output.
+```
+
+If you don't want to set these options via command line and instead do it
+via code, you can do that.  Temper has flags that you can set (```temperFlags_t```):
+```C
+// enable color output
+TEMPER_TURN_FLAG_ON( TEMPER_FLAG_COLORS );
+
+// disable immediate abort on first fail
+TEMPER_TURN_FLAG_OFF( TEMPER_FLAG_ABORT_ON_FAIL );
+```
+
+And to filter tests without command line args:
+```C
+// only run this suite, and no others
+TEMPER_FILTER_SUITE( TheSuite );
+
+// only run this test
+TEMPER_FILTER_TEST( XShouldEqual0 );
 ```
