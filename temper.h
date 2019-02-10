@@ -110,6 +110,9 @@ callback gets called just as the test/suite has finished running, before the
 console output.  Both callbacks return void and take void* as arguments so
 you may pass through them whatever you like.
 
+Any functions with "Internal" in the name means you probably shouldn't go
+touching it.
+
 
 4. COMMAND LINE USAGE:
 Temper supports a few command line options:
@@ -155,8 +158,8 @@ typedef const char*					temperTestConsoleColor_t;
 #endif
 
 typedef enum temperTestFlagBits_t {
-	TEMPER_FLAGS_ABORT_ON_FAIL		= 1ULL << 1,
-	TEMPER_FLAGS_COLORS				= 1ULL << 2,
+	TEMPER_FLAGS_ABORT_ON_FAIL		= 1ULL << 1,	// stop testing immediately after a test fails
+	TEMPER_FLAGS_COLORS				= 1ULL << 2,	// output to console with colors
 } temperTestFlagBits_t;
 typedef uint32_t temperTestFlags_t;
 
@@ -251,6 +254,28 @@ static void TemperShowUsageInternal( void ) {
 #define TEMPER_TEST( name )			temperTestResult_t (name)( void ); temperTestResult_t (name)( void )
 #define TEMPER_SUITE( name )		void (name)( void ); void (name)( void )
 
+#define TEMPER_TURN_FLAG_ON( flag ) \
+	do { \
+		g_testContext.flags |= (flag); \
+	} while ( 0 )
+
+#define TEMPER_TURN_FLAG_OFF( flag ) \
+	do { \
+		g_testContext.flags &= ~(flag); \
+	} while ( 0 )
+
+#define TEMPER_FILTER_SUITE( suiteName ) \
+	do { \
+		g_testContext.filteredSuite = suiteName; \
+	} while ( 0 )
+
+#define TEMPER_FILTER_TEST( testName ) \
+	do { \
+		g_testContext.filteredTest = testName; \
+	} while ( 0 )
+
+// this call is optional
+// you can also call various functions in Temper to do the same things
 #define TEMPER_SET_COMMAND_LINE_ARGS( argc, argv ) \
 	do { \
 		for ( int i = 0; i < argc; i++ ) { \
@@ -258,8 +283,8 @@ static void TemperShowUsageInternal( void ) {
 \
 			if ( arg[0] == '-' ) { \
 				switch ( arg[1] ) { \
-					case 'a': g_testContext.flags |= TEMPER_FLAGS_ABORT_ON_FAIL; break; \
-					case 'c': g_testContext.flags |= TEMPER_FLAGS_COLORS; break; \
+					case 'a': TEMPER_TURN_FLAG_ON( TEMPER_FLAGS_ABORT_ON_FAIL ); break; \
+					case 'c': TEMPER_TURN_FLAG_ON( TEMPER_FLAGS_COLORS ); break; \
 \
 					case 't': { \
 						const char* testName = TemperGetNextArgInternal( i, argc, argv ); \
@@ -268,7 +293,7 @@ static void TemperShowUsageInternal( void ) {
 							exit( EXIT_FAILURE ); \
 						} \
 \
-						g_testContext.filteredTest = testName; \
+						TEMPER_FILTER_TEST( testName ); \
 						i++; \
 						break; \
 					} \
@@ -280,7 +305,7 @@ static void TemperShowUsageInternal( void ) {
 							exit( EXIT_FAILURE ); \
 						} \
 \
-						g_testContext.filteredSuite = suiteName; \
+						TEMPER_FILTER_SUITE( suiteName ); \
 						i++; \
 						break; \
 					} \
@@ -412,17 +437,21 @@ static void TemperShowUsageInternal( void ) {
 		} \
 	} while ( 0 )
 
+#define TEMPER_SKIP_TEST_INTERNAL( test, reasonMsg ) \
+	do { \
+		printf( "	SKIPPED: %s: \"%s\".\n", #test, reasonMsg ); \
+		g_testContext.numSkipped++; \
+	} while ( 0 )
+
 #define TEMPER_SKIP_TEST( test, reasonMsg ) \
 	do { \
 		if ( ( ( g_testContext.flags & TEMPER_FLAGS_ABORT_ON_FAIL ) == 0 ) || g_testContext.numFailed == 0 ) { \
 			if ( g_testContext.filteredTest ) { \
 				if ( strcmp( g_testContext.filteredTest, #test ) == 0 ) { \
-					printf( "	SKIPPED: %s: \"%s\".\n", #test, reasonMsg ); \
-					g_testContext.numSkipped++; \
+					TEMPER_SKIP_TEST_INTERNAL( test, reasonMsg ); \
 				} \
 			} else { \
-				printf( "	SKIPPED: %s: \"%s\".\n", #test, reasonMsg ); \
-				g_testContext.numSkipped++; \
+				TEMPER_SKIP_TEST_INTERNAL( test, reasonMsg ); \
 			} \
 		} \
 	} while ( 0 )
