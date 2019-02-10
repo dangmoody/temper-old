@@ -2,16 +2,28 @@
 
 A Single-header-only test framework, written in C99.
 
-Based on [greatest](https://github.com/silentbicycle/greatest).  Go show the author some love.
+Based on [greatest](https://github.com/silentbicycle/greatest).
+
+Go and show the author of greatest some love - I would probably have
+never written this library without seeing greatest or how it works.
 
 Distributed under MIT License.  See LICENSE file for details.
 
 Documentation is covered in this README and in the main comment at the top of the header.
 
+Temper is compiled with all the following flags turned on (GCC/clang):
+```
+-Wall -Wextra -Werror -Wpedantic -Weverything
+```
+
+So you shouldn't need to disable any warnings etc. in order to plug Temper into your project.  It should 'just work' out of the box.
+
 
 Another testing framework?
 --------------------------
 I like greatest, but there were just a couple of things that slightly bothered me.  So I decided to make one for me that fits my needs and I can maintain at my own free will.
+
+I've always had pain trying to install GTest and make it work on projects and I don't particularly love the output it gives.  It's nice enough when you get it working, but rather cumbersome IMO.
 
 I like to open-source most of the things I make in the hope it will be useful to someone else too.
 
@@ -23,19 +35,23 @@ Download `temper.h` and include it.  Done!
 
 Code Usage
 ----------
-Temper requires init and shutdown calls.  These can be done anywhere,
-but main() is recommended.  Temper also tracks the return code:
+Temper requires only one call to setup "defs".  These must be in the same
+file as main().  Temper also tracks the return code:
+
 ```C
+TEMPER_DEFS();
+
 int main( int argc, char** argv ) {
-	TEMPER_INIT();
+	// do your tests, suites, whatever
 
-	// do your tests...
-
-	TEMPER_SHUTDOWN();
+	TEMPER_SHOW_STATS();
 
 	return TEMPER_EXIT_CODE();
 }
 ```
+
+```TEMPER_SHOW_STATS();``` prints the stats on passed, failed, and skipped
+tests.
 
 To create a test:
 ```C
@@ -45,6 +61,11 @@ TEMPER_TEST( XShouldEqual0 ) {
 
 	TEMPER_PASS();
 }
+```
+
+To then run that test:
+```C
+TEMPER_RUN_TEST( XShouldEqual0 );
 ```
 
 The following assert-style macros are given; they do what you'd expect:
