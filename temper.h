@@ -174,8 +174,17 @@ And to filter tests without command line args:
 
 #include <stdint.h>
 
+// mainly used to allow declaring external tests and suites in .cpp files
 #ifdef __cplusplus
-extern "C" {
+#define TEMPER_C_LINKAGE_START		extern "C" {
+#define TEMPER_C_LINKAGE_END		}
+#else
+#define TEMPER_C_LINKAGE_START
+#define TEMPER_C_LINKAGE_END
+#endif
+
+#ifdef __cplusplus
+TEMPER_C_LINKAGE_START
 #endif
 
 #if defined( _WIN32 )
@@ -246,13 +255,19 @@ extern temperTestContext_t			g_testContext;
 #define TEMPER_EXIT_CODE()			( ( g_testContext.numFailed == 0 ) ? 0 : 1 )
 
 // forward declare a test suite
-#define TEMPER_SUITE_EXTERN( name )	void (name)( void )
+#define TEMPER_SUITE_EXTERN( name ) \
+	TEMPER_C_LINKAGE_START \
+	void (name)( void ); \
+	TEMPER_C_LINKAGE_END
 
 // defines a test suite (with your code)
 #define TEMPER_SUITE( name )		void (name)( void )
 
 // forward declare a test
-#define TEMPER_TEST_EXTERN( name )	temperTestResult_t (name)( void )
+#define TEMPER_TEST_EXTERN( name ) \
+	TEMPER_C_LINKAGE_START \
+	temperTestResult_t (name)( void ); \
+	TEMPER_C_LINKAGE_END
 
 // defines a test (with your code)
 #define TEMPER_TEST( name )			temperTestResult_t (name)( void )
@@ -265,6 +280,9 @@ extern temperTestContext_t			g_testContext;
 #elif defined( __GNUC__ )
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-function"
+#elif defined( _MSC_VER )
+#pragma warning( push, 4 )
+#pragma warning( disable : 4505 )	// unused function
 #endif
 static void TemperSetTextColorInternal( const temperTestConsoleColor_t color ) {
 	if ( ( g_testContext.flags & TEMPER_FLAG_COLORED_OUTPUT ) == 0 ) {
@@ -298,6 +316,8 @@ static void TemperShowUsageInternal( void ) {
 #pragma clang diagnostic pop
 #elif defined( __GNUC__ )
 #pragma GCC diagnostic pop
+#elif defined( _MSC_VER )
+#pragma warning( pop )
 #endif
 
 // get the stats from temper on passed, failed, and skipped tests
@@ -565,5 +585,5 @@ static void TemperShowUsageInternal( void ) {
 	TEMPER_FAIL_TEST_INTERNAL( NULL )
 
 #ifdef __cplusplus
-}
+TEMPER_C_LINKAGE_END
 #endif
