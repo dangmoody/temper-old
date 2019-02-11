@@ -143,11 +143,8 @@ Temper supports a few command line options:
 If you don't want to set these options via command line and instead do it
 via code, you can do that.  Temper has flags that you can set (```temperFlags_t```):
 ```C
-// enable color output
-TEMPER_TURN_FLAG_ON( TEMPER_FLAG_COLORS );
-
-// disable immediate abort on first fail
-TEMPER_TURN_FLAG_OFF( TEMPER_FLAG_ABORT_ON_FAIL );
+TEMPER_TURN_FLAG_ON( flag );
+TEMPER_TURN_FLAG_OFF( flag );
 ```
 
 And to filter tests without command line args:
