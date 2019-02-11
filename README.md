@@ -57,7 +57,7 @@ To create a test:
 ```C
 TEMPER_TEST( XShouldEqual0 ) {
 	float x = 0.0f;
-	TEMPER_EXPECT_TRUE( floateq( x, 0.0f ) );
+	TEMPER_EXPECT_TRUE( x == 0.0f );
 
 	TEMPER_PASS();
 }
