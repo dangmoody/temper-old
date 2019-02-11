@@ -192,11 +192,11 @@ typedef uint32_t					temperTestConsoleColor_t;
 typedef const char*					temperTestConsoleColor_t;
 #endif
 
-typedef uint32_t temperFlags_t;
 typedef enum temperFlagBits_t {
-	TEMPER_FLAGS_ABORT_ON_FAIL		= 1ULL << 1,	// stop testing immediately after a test fails
-	TEMPER_FLAGS_COLORS				= 1ULL << 2,	// output to console with colors
+	TEMPER_FLAG_ABORT_ON_FAIL		= 1ULL << 1,	// stop testing immediately after a test fails
+	TEMPER_FLAG_COLORED_OUTPUT		= 1ULL << 2,	// output to console with colors
 } temperFlagBits_t;
+typedef uint32_t temperFlags_t;
 
 typedef enum temperTestResult_t {
 	TEMPER_RESULT_PASSED			= 0,
@@ -265,7 +265,7 @@ extern temperTestContext_t			g_testContext;
 #pragma GCC diagnostic ignored "-Wunused-function"
 #endif
 static void TemperSetTextColorInternal( const temperTestConsoleColor_t color ) {
-	if ( ( g_testContext.flags & TEMPER_FLAGS_COLORS ) == 0 ) {
+	if ( ( g_testContext.flags & TEMPER_FLAG_COLORED_OUTPUT ) == 0 ) {
 		return;
 	}
 
@@ -318,17 +318,23 @@ static void TemperShowUsageInternal( void ) {
 		g_testContext.flags &= ~(flag); \
 	} while ( 0 )
 
-// makes Temper only run the test suite with the given name
-#define TEMPER_FILTER_SUITE( suiteName ) \
+#define TEMPER_FILTER_SUITE_INTERNAL( suiteName ) \
 	do { \
 		g_testContext.filteredSuite = suiteName; \
 	} while ( 0 )
 
-// makes Temper only run the test with the given name
-#define TEMPER_FILTER_TEST( testName ) \
+// makes Temper only run the test suite with the given name
+#define TEMPER_FILTER_SUITE( suite ) \
+	TEMPER_FILTER_SUITE_INTERNAL( #suite )
+
+#define TEMPER_FILTER_TEST_INTERNAL( testName ) \
 	do { \
 		g_testContext.filteredTest = testName; \
 	} while ( 0 )
+
+// makes Temper only run the test with the given name
+#define TEMPER_FILTER_TEST( test ) \
+	TEMPER_FILTER_TEST_INTERNAL( #test )
 
 // set Temper's command line args (and therefore settings) in one go
 // this call is optional
@@ -340,8 +346,8 @@ static void TemperShowUsageInternal( void ) {
 \
 			if ( arg[0] == '-' ) { \
 				switch ( arg[1] ) { \
-					case 'a': TEMPER_TURN_FLAG_ON( TEMPER_FLAGS_ABORT_ON_FAIL ); break; \
-					case 'c': TEMPER_TURN_FLAG_ON( TEMPER_FLAGS_COLORS ); break; \
+					case 'a': TEMPER_TURN_FLAG_ON( TEMPER_FLAG_ABORT_ON_FAIL ); break; \
+					case 'c': TEMPER_TURN_FLAG_ON( TEMPER_FLAG_COLORED_OUTPUT ); break; \
 \
 					case 't': { \
 						const char* testName = TemperGetNextArgInternal( i, argc, argv ); \
@@ -465,7 +471,7 @@ static void TemperShowUsageInternal( void ) {
 // runs the test
 #define TEMPER_RUN_TEST( test ) \
 	do { \
-		if ( ( ( g_testContext.flags & TEMPER_FLAGS_ABORT_ON_FAIL ) == 0 ) || g_testContext.numFailed == 0 ) { \
+		if ( ( ( g_testContext.flags & TEMPER_FLAG_ABORT_ON_FAIL ) == 0 ) || g_testContext.numFailed == 0 ) { \
 			temperTestResult_t result = TEMPER_RESULT_SKIPPED; \
 			if ( g_testContext.filteredTest ) { \
 				if ( strcmp( g_testContext.filteredTest, #test ) == 0 ) { \
@@ -488,7 +494,11 @@ static void TemperShowUsageInternal( void ) {
 					TemperSetTextColorInternal( TEMPER_COLOR_RED ); \
 					printf( "	FAILED:" ); \
 					TemperSetTextColorInternal( TEMPER_COLOR_YELLOW ); \
-					printf( "  %s: \"%s\" at %s:%d.\n", #test, g_testContext.msg, g_testContext.file, g_testContext.line ); \
+					if ( g_testContext.msg ) { \
+						printf( "  %s: \"%s\" at %s:%d.\n", #test, g_testContext.msg, g_testContext.file, g_testContext.line ); \
+					} else { \
+						printf( "  %s: at %s:%d.\n", #test, g_testContext.file, g_testContext.line ); \
+					} \
 					TemperSetTextColorInternal( TEMPER_COLOR_DEFAULT ); \
 					break; \
 				} \
@@ -511,7 +521,7 @@ static void TemperShowUsageInternal( void ) {
 #define TEMPER_SKIP_TEST( test, reasonMsg ) \
 	do { \
 		( (void) test ); \
-		if ( ( ( g_testContext.flags & TEMPER_FLAGS_ABORT_ON_FAIL ) == 0 ) || g_testContext.numFailed == 0 ) { \
+		if ( ( ( g_testContext.flags & TEMPER_FLAG_ABORT_ON_FAIL ) == 0 ) || g_testContext.numFailed == 0 ) { \
 			if ( g_testContext.filteredTest ) { \
 				if ( strcmp( g_testContext.filteredTest, #test ) == 0 ) { \
 					TEMPER_SKIP_TEST_INTERNAL( test, reasonMsg ); \
@@ -547,12 +557,8 @@ static void TemperShowUsageInternal( void ) {
 		return TEMPER_RESULT_PASSED; \
 	} while ( 0 )
 
-// exit the test, telling temper that the test has failed
 #define TEMPER_FAIL() \
-	do { \
-		g_testContext.numFailed++; \
-		return TEMPER_RESULT_FAILED; \
-	} while ( 0 )
+	TEMPER_FAIL_TEST_INTERNAL( NULL )
 
 #ifdef __cplusplus
 }
