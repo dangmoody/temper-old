@@ -12,7 +12,6 @@ int main( int argc, char** argv ) {
 	( (void) argv );
 
 	TEMPER_RUN_SUITE( TheSuite );
-	printf( "So far: %d\n", g_testContext.numPassed );
 	TEMPER_RUN_TEST( XShouldEqual0 );
 
 	TEMPER_SHOW_STATS();
