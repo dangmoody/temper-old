@@ -235,6 +235,8 @@ typedef struct temperTestContext_t {
 
 extern temperTestContext_t			g_testContext;
 
+// initialises Temper
+// this is required to make Temper work properly
 #define TEMPER_DEFS() \
 	temperTestContext_t				g_testContext	= { 0 }
 
