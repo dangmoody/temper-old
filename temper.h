@@ -154,10 +154,12 @@ via code, you can do that.  Temper has flags that you can set (temperFlags_t):
 
 And to filter tests without command line args:
 
-	// only run this suite, and no others
+	// tell Temper that you only want to run this suite
+	// you will still need to manually run it
 	TEMPER_FILTER_SUITE( TheSuite );
 
-	// only run this test
+	// tell Temper that you only want to run this test
+	// you will still need to manually run it
 	TEMPER_FILTER_TEST( XShouldEqual0 );
 
 ===========================================================================
@@ -323,7 +325,8 @@ static void TemperShowUsageInternal( void ) {
 		g_testContext.filteredSuite = suiteName; \
 	} while ( 0 )
 
-// makes Temper only run the test suite with the given name
+// tell Temper that you only want to run this suite
+// you will still need to manually run it
 #define TEMPER_FILTER_SUITE( suite ) \
 	TEMPER_FILTER_SUITE_INTERNAL( #suite )
 
@@ -332,7 +335,8 @@ static void TemperShowUsageInternal( void ) {
 		g_testContext.filteredTest = testName; \
 	} while ( 0 )
 
-// makes Temper only run the test with the given name
+// tell Temper that you only want to run this test
+// you will still need to manually run it
 #define TEMPER_FILTER_TEST( test ) \
 	TEMPER_FILTER_TEST_INTERNAL( #test )
 

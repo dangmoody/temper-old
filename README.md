@@ -149,9 +149,11 @@ TEMPER_TURN_FLAG_OFF( flag );
 
 And to filter tests without command line args:
 ```C
-// only run this suite, and no others
+// tell Temper that you only want to run this suite
+// you will still need to manually run it
 TEMPER_FILTER_SUITE( TheSuite );
 
-// only run this test
+// tell Temper that you only want to run this test
+// you will still need to manually run it
 TEMPER_FILTER_TEST( XShouldEqual0 );
 ```
