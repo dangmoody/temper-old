@@ -30,7 +30,7 @@ I like to open-source most of the things I make in the hope it will be useful to
 
 Installation
 ------------
-Download `temper.h` and include it.  Done!
+Download `temper.h` and include it in your project.  Done!
 
 
 Code Usage
