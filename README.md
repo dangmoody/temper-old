@@ -157,3 +157,8 @@ TEMPER_FILTER_SUITE( TheSuite );
 // you will still need to manually run it
 TEMPER_FILTER_TEST( XShouldEqual0 );
 ```
+
+
+Special Thanks To:
+------------------
+* Zack Dutton	-	bug reports
