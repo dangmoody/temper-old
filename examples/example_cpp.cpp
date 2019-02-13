@@ -5,13 +5,7 @@
 
 TEMPER_DEFS();
 
-//#ifdef __cplusplus
-//extern "C" {
-//#endif
 TEMPER_SUITE_EXTERN( TheSuite );
-//#ifdef __cplusplus
-//}
-//#endif
 
 int main( int argc, char** argv ) {
 	( (void) argc );
@@ -20,8 +14,6 @@ int main( int argc, char** argv ) {
 	TEMPER_RUN_SUITE( TheSuite );
 
 	TEMPER_SHOW_STATS();
-
-	getchar();
 
 	return TEMPER_EXIT_CODE();
 }

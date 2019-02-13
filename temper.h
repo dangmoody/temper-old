@@ -174,17 +174,32 @@ And to filter tests without command line args:
 
 #include <stdint.h>
 
-// mainly used to allow declaring external tests and suites in .cpp files
 #ifdef __cplusplus
-#define TEMPER_C_LINKAGE_START		extern "C" {
-#define TEMPER_C_LINKAGE_END		}
-#else
-#define TEMPER_C_LINKAGE_START
-#define TEMPER_C_LINKAGE_END
+extern "C" {
 #endif
 
+#if defined( __clang__ )
+#pragma clang diagnostic push
+#elif defined( __GNUC__ )
+#pragma GCC diagnostic push
+#elif defined( _MSC_VER )
+#pragma warning( push, 4 )
+#endif
+
+#if defined( __clang__ )
+#pragma clang diagnostic ignored "-Wunused-function"
+#pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
+#pragma clang diagnostic ignored "-Wold-style-cast"
+#pragma clang diagnostic ignored "-Wc++98-compat-pedantic"
+#elif defined( __GNUC__ )
+#pragma GCC diagnostic ignored "-Wunused-function"
 #ifdef __cplusplus
-TEMPER_C_LINKAGE_START
+#pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
+#pragma GCC diagnostic ignored "-Wold-style-cast"
+#endif
+#elif defined( _MSC_VER )
+#pragma warning( disable : 4505 )	// unused function
+#pragma warning( disable : 4551 )	// function call missing argument list
 #endif
 
 #if defined( _WIN32 )
@@ -248,42 +263,29 @@ extern temperTestContext_t			g_testContext;
 
 // initialises Temper
 // this is required to make Temper work properly
+#ifdef __cplusplus
+#define TEMPER_DEFS() \
+	temperTestContext_t				g_testContext	= {}
+#else
 #define TEMPER_DEFS() \
 	temperTestContext_t				g_testContext	= { 0 }
+#endif
 
 // returns the program exit code according to Temper
 #define TEMPER_EXIT_CODE()			( ( g_testContext.numFailed == 0 ) ? 0 : 1 )
 
 // forward declare a test suite
-#define TEMPER_SUITE_EXTERN( name ) \
-	TEMPER_C_LINKAGE_START \
-	void (name)( void ); \
-	TEMPER_C_LINKAGE_END
+#define TEMPER_SUITE_EXTERN( name )	void (name)( void )
 
 // defines a test suite (with your code)
-#define TEMPER_SUITE( name )		void (name)( void )
+#define TEMPER_SUITE( name )		void (name)( void ); void (name)( void )
 
 // forward declare a test
-#define TEMPER_TEST_EXTERN( name ) \
-	TEMPER_C_LINKAGE_START \
-	temperTestResult_t (name)( void ); \
-	TEMPER_C_LINKAGE_END
+#define TEMPER_TEST_EXTERN( name )	temperTestResult_t (name)( void )
 
 // defines a test (with your code)
-#define TEMPER_TEST( name )			temperTestResult_t (name)( void )
+#define TEMPER_TEST( name )			temperTestResult_t (name)( void ); temperTestResult_t (name)( void )
 
-// clang with -Wpedantic claims these functions aren't used
-// so just ignore that here, we know they are under the right circumstances
-#if defined( __clang__ )
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-function"
-#elif defined( __GNUC__ )
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-function"
-#elif defined( _MSC_VER )
-#pragma warning( push, 4 )
-#pragma warning( disable : 4505 )	// unused function
-#endif
 static void TemperSetTextColorInternal( const temperTestConsoleColor_t color ) {
 	if ( ( g_testContext.flags & TEMPER_FLAG_COLORED_OUTPUT ) == 0 ) {
 		return;
@@ -312,13 +314,6 @@ static void TemperShowUsageInternal( void ) {
 		"\t-c         : Enable colored output.\n"
 	);
 }
-#if defined( __clang__ )
-#pragma clang diagnostic pop
-#elif defined( __GNUC__ )
-#pragma GCC diagnostic pop
-#elif defined( _MSC_VER )
-#pragma warning( pop )
-#endif
 
 // get the stats from temper on passed, failed, and skipped tests
 // you'll probably only want to display this at the end of your test program
@@ -544,7 +539,6 @@ static void TemperShowUsageInternal( void ) {
 // the test will still be outputted to console, but it will not actually run
 #define TEMPER_SKIP_TEST( test, reasonMsg ) \
 	do { \
-		( (void) test ); \
 		if ( ( ( g_testContext.flags & TEMPER_FLAG_ABORT_ON_FAIL ) == 0 ) || g_testContext.numFailed == 0 ) { \
 			if ( g_testContext.filteredTest ) { \
 				if ( strcmp( g_testContext.filteredTest, #test ) == 0 ) { \
@@ -584,6 +578,14 @@ static void TemperShowUsageInternal( void ) {
 #define TEMPER_FAIL() \
 	TEMPER_FAIL_TEST_INTERNAL( NULL )
 
+#if defined( __clang__ )
+#pragma clang diagnostic pop
+#elif defined( __GNUC__ )
+#pragma GCC diagnostic pop
+#elif defined( _MSC_VER )
+#pragma warning( pop )
+#endif
+
 #ifdef __cplusplus
-TEMPER_C_LINKAGE_END
+}
 #endif
