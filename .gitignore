@@ -19,6 +19,7 @@ temper/
 
 # other files
 *.bat
+*.zip
 *.json
 *.code-workspace
 
