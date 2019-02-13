@@ -107,12 +107,12 @@ You can also forward declare tests and suites:
 
 If you want to skip a test:
 
-	TEMPER_SKIP_TEST( FlakyTest, "TeamCity doesn't like this test for some reason..." );
+	TEMPER_SKIP_TEST( XShouldEqual0, "TeamCity doesn't like this test for some reason..." );
 
 Temper will then mark the test as skipped and display the reason
 message in the console, for example:
 
-	SKIPPED: FlakyTest: "TeamCity doesn't like this test for some reason...".
+	SKIPPED: XShouldEqual0: "TeamCity doesn't like this test for some reason...".
 
 You can also specify callbacks to run before and after each test and suite
 is run:
