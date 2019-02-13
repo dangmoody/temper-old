@@ -161,4 +161,4 @@ TEMPER_FILTER_TEST( XShouldEqual0 );
 
 Special Thanks To:
 ------------------
-* Zack Dutton	-	bug reports
+* Zack Dutton	-	bug reports and testing
