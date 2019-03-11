@@ -1,0 +1,16 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"neon_test.h\u0000eon_test.h": "c",
+			"neon_test.h\u0000neon_test.h": "c",
+			"neon_test.h\u0000n_test.h": "c",
+			"neon_test.h\u0000test.h": "c",
+			"neon_test.h\u0000_test.h": "c"
+		}
+	}
+}

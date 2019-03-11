@@ -13,15 +13,11 @@
 
 # VS project folders
 .vs/
-.vscode/
 x64/
 temper/
 
 # other files
-*.bat
 *.zip
-*.json
-*.code-workspace
 
 # build folders
 build/

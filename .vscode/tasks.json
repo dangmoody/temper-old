@@ -1,0 +1,93 @@
+{
+	// See https://go.microsoft.com/fwlink/?LinkId=733558
+	// for the documentation about the tasks.json format
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "example suite - clang",
+			"type": "process",
+			"command": "build_clang.bat",
+			"args": [
+				"example_suite"
+			],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			}
+		},
+
+		{
+			"label": "example basic - clang",
+			"type": "process",
+			"command": "build_clang.bat",
+			"args": [
+				"example_basic"
+			],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			}
+		},
+
+		{
+			"label": "example extern - clang",
+			"type": "process",
+			"command": "build_clang.bat",
+			"args": [
+				"example_extern"
+			],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			}
+		},
+
+		{
+			"label": "example basic - gcc",
+			"type": "process",
+			"command": "build_gcc.bat",
+			"args": [
+				"example_basic"
+			],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			}
+		},
+
+		{
+			"label": "example extern - gcc",
+			"type": "process",
+			"command": "build_gcc.bat",
+			"args": [
+				"example_extern"
+			],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			}
+		},
+
+		{
+			"label": "example C++ - clang",
+			"type": "process",
+			"command": "clang++",
+			"args": [
+				"-o build/example_cpp2.exe",
+
+				"-Wall",
+				"-Wextra",
+				"-Werror",
+				"-Wpedantic",
+				"-Weverything",
+
+				"examples/example_cpp.cpp",
+				"examples/sample_suite_cpp.cpp",
+			],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			}
+		},
+	]
+}
