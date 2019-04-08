@@ -1,5 +1,7 @@
 # Temper
 
+[![Build status](https://ci.appveyor.com/api/projects/status/nqbt74g9eu4b990l?svg=true)](https://ci.appveyor.com/project/dan59767/temper)
+
 A Single-header-only test framework, written in C99.
 
 Based on [greatest](https://github.com/silentbicycle/greatest).
