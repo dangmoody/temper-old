@@ -1,0 +1,8 @@
+:image
+- Visual Studio 2015
+- Ubuntu
+
+platform: x64
+
+- cmd: call build_win64.bat
+- sh: source build_linux.bat
