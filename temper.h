@@ -170,6 +170,7 @@ And to filter tests without command line args:
 #endif
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <memory.h>
 
 #include <stdint.h>
@@ -222,7 +223,7 @@ typedef enum temperFlagBits_t {
 	TEMPER_FLAG_ABORT_ON_FAIL		= 1ULL << 1,	// stop testing immediately after a test fails
 	TEMPER_FLAG_COLORED_OUTPUT		= 1ULL << 2,	// output to console with colors
 } temperFlagBits_t;
-typedef uint32_t temperFlags_t;
+typedef uint64_t temperFlags_t;
 
 typedef enum temperTestResult_t {
 	TEMPER_RESULT_PASSED			= 0,
@@ -245,11 +246,11 @@ typedef struct temperTestContext_t {
 	temperTestCallback_t			testFuncStart;
 	temperTestCallback_t			testFuncEnd;
 
+	temperFlags_t					flags;
+
 	uint32_t						numPassed;
 	uint32_t						numFailed;
 	uint32_t						numSkipped;
-
-	temperFlags_t					flags;
 
 	uint32_t						line;
 	const char*						file;
@@ -294,7 +295,7 @@ static void TemperSetTextColorInternal( const temperTestConsoleColor_t color ) {
 #if defined( _WIN32 )
 	SetConsoleTextAttribute( GetStdHandle( STD_OUTPUT_HANDLE ), (WORD) color );
 #elif defined( __linux__ )
-	printf( color );
+	printf( "%s", color );
 #endif
 }
 

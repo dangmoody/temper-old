@@ -1,7 +1,7 @@
 #include "../temper.h"
-#include <conio.h>
-#include <math.h>
+
 #include <stdio.h>
+#include <math.h>
 
 TEMPER_DEFS();
 
