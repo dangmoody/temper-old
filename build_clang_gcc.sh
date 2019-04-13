@@ -1,12 +1,5 @@
 #!/bin/bash
 
-# can ebe either:
-#	- clang
-#	- clang++
-#	- gcc
-#	- g++
-compiler=$1
-
 mkdir build
 cd build
 
@@ -18,17 +11,20 @@ else
 	compile_options="-Wall -Wextra -Werror -O3 -ffast-math"
 fi
 
-echo Compiling for ${compiler}...
+do_build () {
+	compiler=$1
+	output_filename=$2
+	source_files=$3
 
-source_files=../examples/example_basic.c
-$compiler -o build/example_basic_${compiler}.exe ${source_files} ${compile_options} ${ignore_warnings}
+	$compiler -o build/${output_filename}_${compiler}.exe ${source_files} ${compile_options} ${ignore_warnings}
+}
 
-source_files=../examples/example_suite.c ../examples/sample_suite.c
-$compiler -o build/example_suite_${compiler}.exe ${source_files} ${compile_options} ${ignore_warnings}
+# clang
+do_build clang example_basic ../examples/example_basic.c
+do_build clang example_suite ../examples/example_suite.c ../examples/sample_suite.c
+do_build clang++ ../examples/example_cpp.cpp ../examples/sample_suite_cpp.cpp
 
-if [[ ${compiler} == ++ ]]; then
-source_files=../examples/example_cpp.cpp ../examples/sample_suite_cpp.cpp
-$compiler -o build/example_cpp_${compiler}.exe ${source_files} ${compile_options} ${ignore_warnings}
-fi
-
-echo Done...
+# gcc
+do_build gcc example_basic ../examples/example_basic.c
+do_build gcc example_suite ../examples/example_suite.c ../examples/sample_suite.c
+do_build g++ ../examples/example_cpp.cpp ../examples/sample_suite_cpp.cpp
