@@ -39,7 +39,9 @@ TEMPER_TEST( XShouldEqual0 ) {
 }
 
 TEMPER_TEST( XShouldEqual1 ) {
-	float x = 0.0f;
+	// DM: changed from 0.0f 
+	// used to be 0.0f for testing if tests failed as expected
+	float x = 1.0f;
 	TEMPER_EXPECT_TRUE( floateq( x, 1.0f ) );
 
 	TEMPER_PASS();
