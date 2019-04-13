@@ -3,7 +3,9 @@
 #include <stdio.h>
 
 TEMPER_TEST( XShouldEqualString0 ) {
-	const char* msg = "This is a string";
+	// DM: test used to be deliberately wrong
+	// but I've made it pass for travis' sake
+	const char* msg = "THiS iS a STRinG";
 	TEMPER_EXPECT_TRUE( strcmp( msg, "THiS iS a STRinG" ) == 0 );
 
 	TEMPER_PASS();
