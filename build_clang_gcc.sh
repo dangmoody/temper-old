@@ -14,17 +14,17 @@ fi
 do_build () {
 	compiler=$1
 	output_filename=$2
-	source_files=$3
+	source_files="${@:3}"
 
-	$compiler -o build/${output_filename}_${compiler}.exe ${source_files} ${compile_options} ${ignore_warnings}
+	$compiler -o ${output_filename}_${compiler}.exe ${source_files} ${compile_options} ${ignore_warnings}
 }
 
 # clang
 do_build clang example_basic ../examples/example_basic.c
-do_build clang example_suite ../examples/example_suite.c ../examples/sample_suite.c
-do_build clang++ ../examples/example_cpp.cpp ../examples/sample_suite_cpp.cpp
+do_build clang example_suite "../examples/example_suite.c ../examples/sample_suite.c"
+do_build clang++ example_cpp "../examples/example_cpp.cpp ../examples/sample_suite_cpp.cpp"
 
 # gcc
 do_build gcc example_basic ../examples/example_basic.c
-do_build gcc example_suite ../examples/example_suite.c ../examples/sample_suite.c
-do_build g++ ../examples/example_cpp.cpp ../examples/sample_suite_cpp.cpp
+do_build gcc example_suite "../examples/example_suite.c ../examples/sample_suite.c"
+do_build g++ example_cpp "../examples/example_cpp.cpp ../examples/sample_suite_cpp.cpp"
