@@ -11,6 +11,9 @@
 *.tlog
 *.lastbuildstate
 
+# vs code crap
+.vscode/ipch/
+
 # VS project folders
 .vs/
 x64/
