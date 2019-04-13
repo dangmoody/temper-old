@@ -3,18 +3,23 @@
 mkdir build
 cd build
 
-ignore_warnings=-Wno-missing-prototypes
-
-if [ compiler = "clang" ]; then
-	compile_options="-Wall -Wextra -Werror -Wpedantic -Weverything -O3 -ffast-math"
-else
-	compile_options="-Wall -Wextra -Werror -O3 -ffast-math"
-fi
-
 do_build () {
 	compiler=$1
 	output_filename=$2
 	source_files="${@:3}"
+
+	if [ $compiler == clang* ]; then
+		compile_options="-Wall -Wextra -Werror -Wpedantic -Weverything -O3 -ffast-math"
+	else
+		compile_options="-Wall -Wextra -Werror -O3 -ffast-math"
+	fi
+
+	if [ $compiler == *++ ]; then
+		# travis doesn't like this one if language "cpp" is selected
+		ignore_warnings=-Wno-missing-prototypes
+	else
+		ignore_warnings=""
+	fi
 
 	$compiler -o ${output_filename}_${compiler}.exe ${source_files} ${compile_options} ${ignore_warnings}
 }
