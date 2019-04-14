@@ -22,7 +22,7 @@ matrix:
       os: windows
       language: c
       compiler: clang
-      before_script: chmod +x build_clang_gcc.sh
+      before_script: chmod +x tools/build_clang_gcc.sh
       script: ./tools/build_clang_gcc.sh clang
       after_success:
         - build/example_basic_clang.exe
@@ -33,7 +33,7 @@ matrix:
       os: windows
       language: cpp
       compiler: clang
-      before_script: chmod +x build_clang_gcc.sh
+      before_script: chmod +x tools/build_clang_gcc.sh
       script: ./tools/build_clang_gcc.sh  clang++
       after_success:
         - build/example_cpp_clang++.exe
@@ -43,7 +43,7 @@ matrix:
       os: windows
       language: c
       compiler: gcc
-      before_script: chmod +x build_clang_gcc.sh
+      before_script: chmod +x tools/build_clang_gcc.sh
       script: ./tools/build_clang_gcc.sh gcc
       after_success:
         - build/example_basic_gcc.exe
@@ -54,7 +54,7 @@ matrix:
       os: windows
       language: cpp
       compiler: gcc
-      before_script: chmod +x build_clang_gcc.sh
+      before_script: chmod +x tools/build_clang_gcc.sh
       script: ./tools/build_clang_gcc.sh g++
       after_success:
         - build/example_cpp_g++.exe
@@ -64,7 +64,7 @@ matrix:
       os: linux
       language: c
       compiler: clang
-      before_script: chmod +x build_clang_gcc.sh
+      before_script: chmod +x tools/build_clang_gcc.sh
       script: ./tools/build_clang_gcc.sh clang
       after_success:
         - build/example_basic_clang.exe
@@ -75,7 +75,7 @@ matrix:
       os: linux
       language: cpp
       compiler: clang
-      before_script: chmod +x build_clang_gcc.sh
+      before_script: chmod +x tools/build_clang_gcc.sh
       script: ./tools/build_clang_gcc.sh clang++
       after_success:
         - build/example_cpp_clang++.exe
@@ -85,7 +85,7 @@ matrix:
       os: linux
       language: c
       compiler: gcc
-      before_script: chmod +x build_clang_gcc.sh
+      before_script: chmod +x tools/build_clang_gcc.sh
       script: ./tools/build_clang_gcc.sh gcc
       after_success:
         - build/example_basic_gcc.exe
@@ -96,7 +96,7 @@ matrix:
       os: linux
       language: cpp
       compiler: gcc
-      before_script: chmod +x build_clang_gcc.sh
+      before_script: chmod +x tools/build_clang_gcc.sh
       script: ./tools/build_clang_gcc.sh g++
       after_success:
         - build/example_cpp_g++.exe
@@ -107,7 +107,7 @@ matrix:
       osx_image: xcode10.1
       language: c
       compiler: clang
-      before_script: chmod +x build_clang_gcc.sh
+      before_script: chmod +x tools/build_clang_gcc.sh
       script: ./tools/build_clang_gcc.sh clang
       after_success:
         - build/example_basic_clang.exe
@@ -119,7 +119,7 @@ matrix:
       osx_image: xcode10.1
       language: cpp
       compiler: clang
-      before_script: chmod +x build_clang_gcc.sh
+      before_script: chmod +x tools/build_clang_gcc.sh
       script: ./tools/build_clang_gcc.sh clang++
       after_success:
         - build/example_cpp_clang.exe
