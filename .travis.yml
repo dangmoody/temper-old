@@ -158,3 +158,6 @@ matrix:
       script: ./tools/build_clang_gcc.sh clang++
       after_success:
         - build/example_cpp_clang.exe
+
+before_install:
+  - eval "${MATRIX_EVAL}"
