@@ -189,10 +189,10 @@ extern "C" {
 
 #if defined( __clang__ )
 #pragma clang diagnostic ignored "-Wunused-function"
+#pragma clang diagnostic ignored "-Wmissing-field-initializers"
 #pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
 #pragma clang diagnostic ignored "-Wold-style-cast"
 #pragma clang diagnostic ignored "-Wc++98-compat-pedantic"
-#pragma clang diagnostic ignored "-Wmissing-field-initializers"
 #elif defined( __GNUC__ )
 #pragma GCC diagnostic ignored "-Wunused-function"
 #pragma GCC diagnostic ignored "-Wmissing-field-initializers"
@@ -223,14 +223,14 @@ typedef const char*					temperTestConsoleColor_t;
 
 typedef enum temperFlagBits_t {
 	TEMPER_FLAG_ABORT_ON_FAIL		= 1 << 1,	// stop testing immediately after a test fails
-	TEMPER_FLAG_COLORED_OUTPUT		= 1 << 2,	// output to console with colors
+	TEMPER_FLAG_COLORED_OUTPUT		= 1 << 2	// output to console with colors
 } temperFlagBits_t;
 typedef uint32_t temperFlags_t;
 
 typedef enum temperTestResult_t {
 	TEMPER_RESULT_PASSED			= 0,
 	TEMPER_RESULT_FAILED,
-	TEMPER_RESULT_SKIPPED,
+	TEMPER_RESULT_SKIPPED
 } temperTestResult_t;
 
 typedef void( *temperTestCallback_t )( void* userdata );
