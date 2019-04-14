@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# exit when any command fails
+set -e
+
 # if set to "clang" or "gcc" builds the C examples
 # if set to "clang++" or "g++" builds the C++ example
 g_compiler=$1
