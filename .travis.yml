@@ -71,6 +71,9 @@ matrix:
             - llvm-toolchain-trusty-7
           packages:
             - clang-7
+      env:
+        - CC=clang-7
+        - CXX=clang++-7
       before_script: chmod +x tools/build_clang_gcc.sh
       script: ./tools/build_clang_gcc.sh clang
       after_success:
@@ -89,6 +92,9 @@ matrix:
             - llvm-toolchain-trusty-7
           packages:
             - clang-7
+      env:
+        - CC=clang-7
+        - CXX=clang++-7
       before_script: chmod +x tools/build_clang_gcc.sh
       script: ./tools/build_clang_gcc.sh clang++
       after_success:
@@ -106,6 +112,9 @@ matrix:
             - llvm-toolchain-trusty-7
           packages:
             - gcc-8
+      env:
+        - CC=gcc-8
+        - CXX=g++-8
       before_script: chmod +x tools/build_clang_gcc.sh
       script: ./tools/build_clang_gcc.sh gcc
       after_success:
@@ -123,6 +132,9 @@ matrix:
             - ubuntu-toolchain-r-test
           packages:
             - gcc-8
+      env:
+        - CC=gcc-8
+        - CXX=g++-8
       before_script: chmod +x tools/build_clang_gcc.sh
       script: ./tools/build_clang_gcc.sh g++
       after_success:
