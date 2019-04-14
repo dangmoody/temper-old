@@ -1,68 +1,125 @@
-language: cpp
-
 matrix:
   include:
-    # windows msvc
-    - name: "Windows / MSVC"
+    # windows msvc C
+    - name: "Windows / MSVC / C"
       os: windows
+      language: c
       script:
-        - cmd.exe /C '"C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\VC\Auxiliary\Build\vcvarsall.bat" amd64 && build_msvc.bat'
+        - cmd.exe /C '"C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\VC\Auxiliary\Build\vcvarsall.bat" amd64 && tools\build_msvc.bat'
         - build/example_basic_msvc.exe
         - build/example_suite_msvc.exe
+
+    # windows msvc C++
+    - name: "Windows / MSVC / C++"
+      os: windows
+      language: cpp
+      script:
+        - cmd.exe /C '"C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\VC\Auxiliary\Build\vcvarsall.bat" amd64 && tools\build_msvc.bat cpp'
         - build/example_cpp_msvc.exe
 
     # windows clang
     - name: "Windows / Clang"
       os: windows
+      language: c
       compiler: clang
       before_script: chmod +x build_clang_gcc.sh
-      script: ./build_clang_gcc.sh
+      script: ./tools/build_clang_gcc.sh clang
       after_success:
         - build/example_basic_clang.exe
         - build/example_suite_clang.exe
-        - build/example_cpp_clang.exe
+
+    # windows clang++
+    - name: "Windows / Clang++"
+      os: windows
+      language: cpp
+      compiler: clang
+      before_script: chmod +x build_clang_gcc.sh
+      script: ./tools/build_clang_gcc.sh  clang++
+      after_success:
+        - build/example_cpp_clang++.exe
 
     # windows gcc
     - name: "Windows / GCC"
       os: windows
+      language: c
       compiler: gcc
       before_script: chmod +x build_clang_gcc.sh
-      script: ./build_clang_gcc.sh
+      script: ./tools/build_clang_gcc.sh gcc
       after_success:
         - build/example_basic_gcc.exe
         - build/example_suite_gcc.exe
-        - build/example_cpp_gcc.exe
+
+    # windows g++
+    - name: "Windows / G++"
+      os: windows
+      language: cpp
+      compiler: gcc
+      before_script: chmod +x build_clang_gcc.sh
+      script: ./tools/build_clang_gcc.sh g++
+      after_success:
+        - build/example_cpp_g++.exe
 
     # linux clang
     - name: "Linux / Clang"
       os: linux
+      language: c
       compiler: clang
       before_script: chmod +x build_clang_gcc.sh
-      script: ./build_clang_gcc.sh
+      script: ./tools/build_clang_gcc.sh clang
       after_success:
         - build/example_basic_clang.exe
         - build/example_suite_clang.exe
-        - build/example_cpp_clang.exe
+
+    # linux clang++
+    - name: "Linux / Clang++"
+      os: linux
+      language: cpp
+      compiler: clang
+      before_script: chmod +x build_clang_gcc.sh
+      script: ./tools/build_clang_gcc.sh clang++
+      after_success:
+        - build/example_cpp_clang++.exe
 
     # linux gcc
     - name: "Linux / GCC"
       os: linux
+      language: c
       compiler: gcc
       before_script: chmod +x build_clang_gcc.sh
-      script: ./build_clang_gcc.sh
+      script: ./tools/build_clang_gcc.sh gcc
       after_success:
         - build/example_basic_gcc.exe
         - build/example_suite_gcc.exe
-        - build/example_cpp_gcc.exe
+
+    # linux g++
+    - name: "Linux / GCC"
+      os: linux
+      language: cpp
+      compiler: gcc
+      before_script: chmod +x build_clang_gcc.sh
+      script: ./tools/build_clang_gcc.sh g++
+      after_success:
+        - build/example_cpp_g++.exe
 
     # macOS C
     - name: "macOS"
       os: osx
       osx_image: xcode10.1
+      language: c
       compiler: clang
       before_script: chmod +x build_clang_gcc.sh
-      script: ./build_clang_gcc.sh
+      script: ./tools/build_clang_gcc.sh clang
       after_success:
         - build/example_basic_clang.exe
         - build/example_suite_clang.exe
+
+    # macOS C++
+    - name: "macOS"
+      os: osx
+      osx_image: xcode10.1
+      language: cpp
+      compiler: clang
+      before_script: chmod +x build_clang_gcc.sh
+      script: ./tools/build_clang_gcc.sh clang++
+      after_success:
         - build/example_cpp_clang.exe
