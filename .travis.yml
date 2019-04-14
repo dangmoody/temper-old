@@ -92,7 +92,7 @@ matrix:
         - build/example_suite_gcc.exe
 
     # linux g++
-    - name: "Linux / GCC"
+    - name: "Linux / G++"
       os: linux
       language: cpp
       compiler: gcc
