@@ -7,30 +7,6 @@ static bool floateq( const float x, const float y ) {
 	return fabsf( x - y ) < 1e-5f;
 }
 
-void OnSuiteStarting( void* data ) {
-	( (void) data );
-
-	printf( "About to run a test suite.\n" );
-}
-
-void OnSuiteEnded( void* data ) {
-	( (void) data );
-
-	printf( "Test suite finished.\n" );
-}
-
-void OnTestStarting( void* data ) {
-	( (void) data );
-
-	printf( "Test starting.\n" );
-}
-
-void OnTestEnded( void* data ) {
-	( (void) data );
-
-	printf( "Test finished.\n" );
-}
-
 TEMPER_TEST( XShouldEqual0 ) {
 	float x = 0.0f;
 	TEMPER_EXPECT_TRUE( floateq( x, 0.0f ) );
