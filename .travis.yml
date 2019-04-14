@@ -72,8 +72,7 @@ matrix:
           packages:
             - clang-7
       env:
-        - CC=clang-7
-        - CXX=clang++-7
+        - MATRIX_EVAL="CC=clang-7 && CXX=clang++-7"
       before_script: chmod +x tools/build_clang_gcc.sh
       script: ./tools/build_clang_gcc.sh clang
       after_success:
@@ -93,8 +92,7 @@ matrix:
           packages:
             - clang-7
       env:
-        - CC=clang-7
-        - CXX=clang++-7
+        - MATRIX_EVAL="CC=clang-7 && CXX=clang++-7"
       before_script: chmod +x tools/build_clang_gcc.sh
       script: ./tools/build_clang_gcc.sh clang++
       after_success:
@@ -113,8 +111,7 @@ matrix:
           packages:
             - gcc-8
       env:
-        - CC=gcc-8
-        - CXX=g++-8
+        - MATRIX_EVAL="CC=gcc-8 && CXX=g++-8"
       before_script: chmod +x tools/build_clang_gcc.sh
       script: ./tools/build_clang_gcc.sh gcc
       after_success:
@@ -131,10 +128,9 @@ matrix:
           sources:
             - ubuntu-toolchain-r-test
           packages:
-            - gcc-8
+            - g++-8
       env:
-        - CC=gcc-8
-        - CXX=g++-8
+        - MATRIX_EVAL="CC=gcc-8 && CXX=g++-8"
       before_script: chmod +x tools/build_clang_gcc.sh
       script: ./tools/build_clang_gcc.sh g++
       after_success:
