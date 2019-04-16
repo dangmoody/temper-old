@@ -249,7 +249,7 @@ typedef struct temperTestContext_t {
 	temperTestCallback_t			testFuncEnd;
 
 	temperFlags_t					flags;
-	uint32_t						padding0;
+	uint32_t						padding0;	// unused
 
 	uint32_t						numPassed;
 	uint32_t						numFailed;
