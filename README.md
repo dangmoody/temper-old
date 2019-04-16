@@ -1,5 +1,7 @@
 # Temper
 
+[![Build Status](https://travis-ci.com/floorman/temper.svg?branch=master)](https://travis-ci.com/floorman/temper)
+
 A Single-header-only test framework, written in C99.
 
 Based on [greatest](https://github.com/silentbicycle/greatest).
