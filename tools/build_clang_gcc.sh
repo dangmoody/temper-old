@@ -7,12 +7,6 @@ set -e
 # if set to "clang++" or "g++" builds the C++ example
 g_compiler=$1
 
-if [ ! -d "build" ]; then
-	mkdir build
-fi
-
-cd build
-
 do_build () {
 	compiler=$1
 	output_filename=$2
@@ -32,17 +26,21 @@ do_build () {
 		std=-std=c99
 	fi
 
-	$compiler ${std} -o ${output_filename}_${compiler}.exe ${source_files} ${compile_options} ${ignore_warnings}
+	$compiler ${std} -o build/${output_filename}_${compiler}.exe ${source_files} ${compile_options} ${ignore_warnings}
 }
 
-echo ------- Compiling with: ${g_compiler}... -------
+if [ ! -d "build" ]; then
+	mkdir build
+fi
+
+echo ------- Compiling with: ${g_compiler} -------
 
 if [[ "${g_compiler}" == *++* ]]
 then
-	do_build ${g_compiler} example_cpp "../examples/example_cpp.cpp ../examples/sample_suite_cpp.cpp"
+	do_build ${g_compiler} example_cpp "examples/example_cpp.cpp examples/sample_suite_cpp.cpp"
 else
-	do_build ${g_compiler} example_basic ../examples/example_basic.c
-	do_build ${g_compiler} example_suite "../examples/example_suite.c ../examples/sample_suite.c"
+	do_build ${g_compiler} example_basic examples/example_basic.c
+	do_build ${g_compiler} example_suite "examples/example_suite.c examples/sample_suite.c"
 fi
 
 echo ------- Done -------
