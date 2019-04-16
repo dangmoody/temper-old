@@ -7,7 +7,10 @@ set -e
 # if set to "clang++" or "g++" builds the C++ example
 g_compiler=$1
 
-mkdir build
+if [ ! -d "build" ]; then
+	mkdir build
+fi
+
 cd build
 
 do_build () {
