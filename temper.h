@@ -4,6 +4,7 @@
 ===========================================================================
 
 Temper.
+v1.0.1
 
 Distributed under MIT License:
 Copyright (c) 2019 Dan Moody (daniel.guy.moody@gmail.com)
