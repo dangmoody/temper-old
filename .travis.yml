@@ -169,4 +169,4 @@ matrix:
       before_script: chmod +x tools/build_clang_gcc.sh
       script: ./tools/build_clang_gcc.sh ${CXX}
       after_success:
-        - build/example_cpp_clang.exe
+        - build/example_cpp_clang++.exe
