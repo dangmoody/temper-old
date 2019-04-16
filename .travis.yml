@@ -25,8 +25,8 @@ matrix:
       before_script: chmod +x tools/build_clang_gcc.sh
       script: ./tools/build_clang_gcc.sh clang
       after_success:
-        - build/example_basic_clang.exe
-        - build/example_suite_clang.exe
+        - build/example_basic_${CC}.exe
+        - build/example_suite_${CC}.exe
 
     # windows clang++
     - name: "Windows / Clang++"
@@ -34,9 +34,9 @@ matrix:
       language: cpp
       compiler: clang
       before_script: chmod +x tools/build_clang_gcc.sh
-      script: ./tools/build_clang_gcc.sh  clang++
+      script: ./tools/build_clang_gcc.sh clang++
       after_success:
-        - build/example_cpp_clang++.exe
+        - build/example_cpp_${CXX}.exe
 
     # windows gcc
     - name: "Windows / GCC"
@@ -46,8 +46,8 @@ matrix:
       before_script: chmod +x tools/build_clang_gcc.sh
       script: ./tools/build_clang_gcc.sh gcc
       after_success:
-        - build/example_basic_gcc.exe
-        - build/example_suite_gcc.exe
+        - build/example_basic_${CC}.exe
+        - build/example_suite_${CC}.exe
 
     # windows g++
     - name: "Windows / G++"
@@ -57,7 +57,7 @@ matrix:
       before_script: chmod +x tools/build_clang_gcc.sh
       script: ./tools/build_clang_gcc.sh g++
       after_success:
-        - build/example_cpp_g++.exe
+        - build/example_cpp_${CXX}.exe
 
     # linux clang
     - name: "Linux / Clang"
@@ -79,8 +79,8 @@ matrix:
       before_script: chmod +x tools/build_clang_gcc.sh
       script: ./tools/build_clang_gcc.sh ${CC}
       after_success:
-        - build/example_basic_clang.exe
-        - build/example_suite_clang.exe
+        - build/example_basic_${CC}.exe
+        - build/example_suite_${CC}.exe
 
     # linux clang++
     - name: "Linux / Clang++"
@@ -102,7 +102,7 @@ matrix:
       before_script: chmod +x tools/build_clang_gcc.sh
       script: ./tools/build_clang_gcc.sh ${CXX}
       after_success:
-        - build/example_cpp_clang++.exe
+        - build/example_cpp_${CXX}.exe
 
     # linux gcc
     - name: "Linux / GCC"
@@ -124,8 +124,8 @@ matrix:
       before_script: chmod +x tools/build_clang_gcc.sh
       script: ./tools/build_clang_gcc.sh ${CC}
       after_success:
-        - build/example_basic_gcc.exe
-        - build/example_suite_gcc.exe
+        - build/example_basic_${CC}.exe
+        - build/example_suite_${CC}.exe
 
     # linux g++
     - name: "Linux / G++"
@@ -146,7 +146,7 @@ matrix:
       before_script: chmod +x tools/build_clang_gcc.sh
       script: ./tools/build_clang_gcc.sh ${CXX}
       after_success:
-        - build/example_cpp_g++.exe
+        - build/example_cpp_${CXX}.exe
 
     # macOS C
     - name: "macOS / C"
@@ -157,8 +157,8 @@ matrix:
       before_script: chmod +x tools/build_clang_gcc.sh
       script: ./tools/build_clang_gcc.sh ${CC}
       after_success:
-        - build/example_basic_clang.exe
-        - build/example_suite_clang.exe
+        - build/example_basic_${CC}.exe
+        - build/example_suite_${CC}.exe
 
     # macOS C++
     - name: "macOS / C++"
@@ -169,4 +169,4 @@ matrix:
       before_script: chmod +x tools/build_clang_gcc.sh
       script: ./tools/build_clang_gcc.sh ${CXX}
       after_success:
-        - build/example_cpp_clang++.exe
+        - build/example_cpp_${CXX}.exe
