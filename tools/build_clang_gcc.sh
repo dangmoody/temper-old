@@ -25,7 +25,7 @@ do_build () {
 		compile_options="-Wall -Wextra -Werror -O3 -ffast-math"
 	fi
 
-	if [[ "${compiler}" == *++ ]]
+	if [[ "${compiler}" == *++* ]]
 	then
 		std=""
 	else
@@ -37,7 +37,7 @@ do_build () {
 
 echo ------- Compiling with: ${g_compiler}... -------
 
-if [[ "${g_compiler}" == *++ ]]
+if [[ "${g_compiler}" == *++* ]]
 then
 	do_build ${g_compiler} example_cpp "../examples/example_cpp.cpp ../examples/sample_suite_cpp.cpp"
 else
