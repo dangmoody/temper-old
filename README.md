@@ -135,11 +135,25 @@ Command Line Usage
 Temper supports a few command line options:
 
 ```
---help     : Shows the help in console.
--t <name>  : Only run the test with the given name.
--s <suite> : Only run the suite with the given name.
--a         : Abort immediately on test failure.
--c         : Enable colored output.
+-h
+--help
+	Shows this help and exits the program.
+
+-t <name>
+	Only run the test with the given name.
+
+-s <suite>
+	Only run the suite with the given name.
+
+-a
+	Abort immediately on test failure.
+
+-c
+	Enable colored output.
+
+--time-unit=<unit>
+	Set the timer unit of measurement.
+	Can be either: clocks, ns, us, ms, or seconds.
 ```
 
 If you don't want to set these options via command line and instead do it
@@ -158,6 +172,13 @@ TEMPER_FILTER_SUITE( TheSuite );
 // tell Temper that you only want to run this test
 // you will still need to manually run it
 TEMPER_FILTER_TEST( XShouldEqual0 );
+```
+
+To set the time unit, you'll need to set the `temperTimeUnit_t` enum via (for example):
+
+```C
+// sets the unit of measurement for how long tests take to run to microseconds
+TEMPER_SET_TIME_UNIT( TEMPER_TIME_UNIT_US );
 ```
 
 
