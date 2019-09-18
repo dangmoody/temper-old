@@ -193,13 +193,15 @@ extern "C" {
 #define WIN32_LEAN_AND_MEAN 1
 #include <Windows.h>
 #elif defined( __linux__ ) || defined( __APPLE__ )
-#include <time.h>
+#include <sys/time.h>
 #endif
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <memory.h>
 #include <assert.h>
+
+#include <string.h>
 
 #include <stdint.h>
 
@@ -262,11 +264,11 @@ typedef enum temperTestResult_t {
 } temperTestResult_t;
 
 typedef enum temperTimeUnit_t {
-	TEMPER_TIME_UNIT_CLOCKS	= 0,
+	TEMPER_TIME_UNIT_CLOCKS			= 0,
 	TEMPER_TIME_UNIT_NS,
 	TEMPER_TIME_UNIT_US,
 	TEMPER_TIME_UNIT_MS,
-	TEMPER_TIME_UNIT_SECONDS,
+	TEMPER_TIME_UNIT_SECONDS
 } temperTimeUnit_t;
 
 typedef void( *temperTestCallback_t )( void* userdata );
