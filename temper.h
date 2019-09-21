@@ -189,11 +189,29 @@ To set the time unit, you'll need to set the `temperTimeUnit_t` enum via (for ex
 extern "C" {
 #endif
 
-#ifdef _WIN32
-#define WIN32_LEAN_AND_MEAN 1
-#include <Windows.h>
-#elif defined( __linux__ ) || defined( __APPLE__ )
-#include <sys/time.h>
+#if defined( __clang__ )
+#pragma clang diagnostic ignored "-Wunused-function"
+#pragma clang diagnostic ignored "-Wmissing-field-initializers"
+#pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
+#pragma clang diagnostic ignored "-Wold-style-cast"
+#pragma clang diagnostic ignored "-Wc++98-compat-pedantic"
+#pragma clang diagnostic ignored "-Wreserved-id-macro"
+#elif defined( __GNUC__ )
+#pragma GCC diagnostic ignored "-Wunused-function"
+#pragma GCC diagnostic ignored "-Wmissing-field-initializers"
+#ifdef __cplusplus
+#pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
+#pragma GCC diagnostic ignored "-Wold-style-cast"
+#endif
+#elif defined( _MSC_VER )
+#pragma warning( disable : 4505 )	// unused function
+#pragma warning( disable : 4551 )	// function call missing argument list
+#endif // defined( __clang__ )
+
+#if defined( __linux__ ) || defined( __APPLE__ )
+#pragma push_macro( "_POSIX_C_SOURCE" )
+#undef _POSIX_C_SOURCE
+#define _POSIX_C_SOURCE 199309L
 #endif
 
 #include <stdio.h>
@@ -217,23 +235,12 @@ extern "C" {
 #pragma warning( push, 4 )
 #endif // defined( __clang__ )
 
-#if defined( __clang__ )
-#pragma clang diagnostic ignored "-Wunused-function"
-#pragma clang diagnostic ignored "-Wmissing-field-initializers"
-#pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
-#pragma clang diagnostic ignored "-Wold-style-cast"
-#pragma clang diagnostic ignored "-Wc++98-compat-pedantic"
-#elif defined( __GNUC__ )
-#pragma GCC diagnostic ignored "-Wunused-function"
-#pragma GCC diagnostic ignored "-Wmissing-field-initializers"
-#ifdef __cplusplus
-#pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
-#pragma GCC diagnostic ignored "-Wold-style-cast"
-#endif
-#elif defined( _MSC_VER )
-#pragma warning( disable : 4505 )	// unused function
-#pragma warning( disable : 4551 )	// function call missing argument list
-#endif // defined( __clang__ )
+#if defined( _WIN32 )
+#define WIN32_LEAN_AND_MEAN 1
+#include <Windows.h>
+#elif defined( __linux__ ) || defined( __APPLE__ )
+#include <time.h>
+#endif // defined( _WIN32 )
 
 #if defined( _WIN32 )
 #define TEMPER_COLOR_DEFAULT		0x07
@@ -724,6 +731,10 @@ static double TemperGetTimestampInternal( void ) {
 
 #define TEMPER_FAIL() \
 	TEMPER_FAIL_TEST_INTERNAL( NULL )
+
+#if defined( __linux__ ) || defined( __APPLE__ )
+#pragma pop_macro( "_POSIX_C_SOURCE" )
+#endif
 
 #if defined( __clang__ )
 #pragma clang diagnostic pop
