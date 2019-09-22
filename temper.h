@@ -509,8 +509,8 @@ static double TemperGetTimestampInternal( void ) {
 							const char* unitStart = (const char*) memchr( arg, '=', arglen ); \
 							unitStart++; \
 \
-							char unitStr[16]; \
-							snprintf( unitStr, 16, "%s", unitStart ); \
+							char unitStr[1024]; \
+							sprintf( unitStr, "%s", unitStart ); \
 \
 							if ( strcmp( unitStart, "clocks" ) == 0 ) { \
 								TEMPER_SET_TIME_UNIT( TEMPER_TIME_UNIT_CLOCKS ); \
