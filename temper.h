@@ -505,7 +505,7 @@ static double TemperGetTimestampInternal( void ) {
 						if ( strcmp( arg, "--help" ) == 0 ) { \
 							TemperShowUsageInternal(); \
 							exit( EXIT_SUCCESS ); \
-						} else if ( strncmp( arg, "--time-unit=", strlen( "--time-unit=" ) ) == 0 ) { \
+						} else if ( strcmp( arg, "--time-unit=", strlen( "--time-unit=" ) ) == 0 ) { \
 							const char* unitStart = (const char*) memchr( arg, '=', arglen ); \
 							unitStart++; \
 \
