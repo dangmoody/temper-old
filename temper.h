@@ -2,7 +2,7 @@
 ===========================================================================
 
 Temper.
-v1.1.1
+v1.2.0
 
 Distributed under MIT License:
 Copyright (c) 2019 Dan Moody (daniel.guy.moody@gmail.com)
