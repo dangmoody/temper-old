@@ -314,41 +314,56 @@ typedef struct temperTestContext_t {
 
 extern temperTestContext_t			g_testContext;
 
-// initialises Temper
-// this is required to make Temper work properly
-#ifdef __cplusplus
-#define TEMPER_DEFS() \
-	temperTestContext_t				g_testContext	= {}
-#else
-#define TEMPER_DEFS() \
-	temperTestContext_t				g_testContext	= { 0 }
-#endif
+// extern void							TemperSetTextColorInternal( const temperTestConsoleColor_t color );
+// extern const char*					TemperGetNextArgInternal( const int argIndex, const int argc, char** argv );
 
-// returns the program exit code according to Temper
-#define TEMPER_EXIT_CODE()			( ( g_testContext.numFailed == 0 ) ? 0 : 1 )
+// extern void							TemperShowUsageInternal( void );
 
-// forward declare a test suite
-#define TEMPER_SUITE_EXTERN( name )	void (name)( void )
+// extern double						TemperGetTimestampInternal( void );
 
-// defines a test suite (with your code)
-#define TEMPER_SUITE( name )		void (name)( void ); void (name)( void )
+// extern void							TemperShowStatsInternal( void );
 
-// forward declare a test
-#define TEMPER_TEST_EXTERN( name )	temperTestResult_t (name)( void )
+// extern void							TemperTurnFlagOnInternal( const temperFlags_t flag );
+// extern void							TemperTurnFlagOffInternal( const temperFlags_t flag );
 
-// defines a test (with your code)
-#define TEMPER_TEST( name )			temperTestResult_t (name)( void ); temperTestResult_t (name)( void )
+// extern void							TemperFilterSuiteInternal( const char* suiteName );
+// extern void							TemperFilterTestInternal( const char* testName );
+
+// extern void							TemperSetTimeUnitInternal( const temperTimeUnit_t unit );
+
+// extern void							TemperSetCommandLineArgsInternal( int argc, char** argv );
+
+// extern void							TemperSetTestStartCallbackInternal( const temperTestCallback_t callback, void* userdata );
+// extern void							TemperSetTestEndCallbackInternal( const temperTestCallback_t callback, void* userdata );
+
+// extern void							TemperSetSuiteStartCallbackInternal( const temperTestCallback_t callback, void* userdata );
+// extern void							TemperSetSuiteEndCallbackInternal( const temperTestCallback_t callback, void* userdata );
+
+// extern temperTestResult_t			TemperPassInternal( void );
+
+// extern temperTestResult_t			TemperFailTestInternal( const char* errorMsg );
+
+// extern void							TemperRunSuiteInternal2( void ( suite )( void ) );
+// extern void							TemperRunSuiteInternal( void ( suite )( void ) );
+
+// extern temperTestResult_t			TemperGetTestResult( temperTestResult_t( test )( void ) );
+
+// extern void							TemperRunTestInternal( temperTestResult_t( test )( void ), const char* testName );
+
+// extern void							TemperSkipTestInternal2( const char* testName, const char* reasonMsg );
+// extern void							TemperSkipTestInternal( const char* testName, const char* reasonMsg );
+
+// extern void							TemperExpectTrueInternal( const bool condition, const char* conditionStr );
+
+// extern void							TemperExpectFalse( const bool condition, const char* conditionStr );
 
 static void TemperSetTextColorInternal( const temperTestConsoleColor_t color ) {
 	if ( ( g_testContext.flags & TEMPER_FLAG_COLORED_OUTPUT ) == 0 ) {
 		return;
 	}
 
-#if defined( _WIN32 )
+	/* DM!!! add mac/linux back in! */
 	SetConsoleTextAttribute( GetStdHandle( STD_OUTPUT_HANDLE ), (WORD) color );
-#elif defined( __linux__ ) || defined( __APPLE__ )
-	printf( "%s", color );
-#endif
 }
 
 static const char* TemperGetNextArgInternal( const int argIndex, const int argc, char** argv ) {
@@ -382,7 +397,7 @@ static void TemperShowUsageInternal( void ) {
 }
 
 static double TemperGetTimestampInternal( void ) {
-#if defined( _WIN32 )
+	/* DM!!! add mac/linux back in! */
 	static LARGE_INTEGER frequency;
 	if ( frequency.QuadPart == 0 ) {
 		QueryPerformanceFrequency( &frequency );
@@ -398,339 +413,362 @@ static double TemperGetTimestampInternal( void ) {
 		case TEMPER_TIME_UNIT_MS:		return (double) ( ( now.QuadPart * 1000 ) / frequency.QuadPart );
 		case TEMPER_TIME_UNIT_SECONDS:	return (double) ( ( now.QuadPart ) / frequency.QuadPart );
 	}
-#elif defined( __APPLE__ ) || defined( __linux__ )
-	struct timespec now;
-	clock_gettime( CLOCK_MONOTONIC, &now );
 
-	int64_t clocks = (int64_t) ( now.tv_sec * 1000000000 + now.tv_nsec );
-
-	switch ( g_testContext.timeUnit ) {
-		case TEMPER_TIME_UNIT_CLOCKS:	return (double) clocks;
-		case TEMPER_TIME_UNIT_NS:		return (double) clocks;
-		case TEMPER_TIME_UNIT_US:		return (double) clocks / 1000.0;
-		case TEMPER_TIME_UNIT_MS:		return (double) clocks / 1000000.0;
-		case TEMPER_TIME_UNIT_SECONDS:	return (double) clocks / 1000000000.0;
-	}
-#endif
-
-	// should never get here
+	/* should never get here */
 	assert( false && "Unrecognised time unit passed into TemperGetTimestampInternal().\n" );
 
 	return 0.0;
 }
 
+static void TemperShowStatsInternal( void ) {
+	uint32_t totalTests = g_testContext.numPassed + g_testContext.numFailed + g_testContext.numSkipped;
+	printf( "\n%d tests run in total.  %d passed, %d failed, %d skipped.\n", totalTests, g_testContext.numPassed, g_testContext.numFailed, g_testContext.numSkipped );
+}
+
+static void TemperTurnFlagOnInternal( const temperFlags_t flag ) {
+	g_testContext.flags |= flag;
+}
+
+static void TemperTurnFlagOffInternal( const temperFlags_t flag ) {
+	g_testContext.flags &= ~flag;
+}
+
+static void TemperFilterSuiteInternal( const char* suiteName ) {
+	g_testContext.filteredSuite = suiteName;
+}
+
+static void TemperFilterTestInternal( const char* testName ) {
+	g_testContext.filteredTest = testName;
+}
+
+static void TemperSetTimeUnitInternal( const temperTimeUnit_t unit ) {
+	g_testContext.timeUnit = unit;
+
+	switch ( unit ) {
+		case TEMPER_TIME_UNIT_CLOCKS:	g_testContext.timeUnitStr = "clocks"; break;
+		case TEMPER_TIME_UNIT_NS:		g_testContext.timeUnitStr = "ns"; break;
+		case TEMPER_TIME_UNIT_US:		g_testContext.timeUnitStr = "us"; break;
+		case TEMPER_TIME_UNIT_MS:		g_testContext.timeUnitStr = "ms"; break;
+		case TEMPER_TIME_UNIT_SECONDS:	g_testContext.timeUnitStr = "seconds"; break;
+
+		default:
+			printf( "ERROR: Unknown time unit specified at %s:%d.\n", __FILE__, __LINE__ );
+			assert( false );
+			exit( EXIT_FAILURE );
+	}
+}
+
+static void TemperSetCommandLineArgsInternal( int argc, char** argv ) {
+	/* set defaults in case args don't get set */
+	TemperSetTimeUnitInternal( TEMPER_TIME_UNIT_MS );
+
+	for ( int i = 0; i < argc; i++ ) {
+		const char* arg = argv[i];
+		size_t arglen = strlen( arg );
+
+		const char* nextArg = TemperGetNextArgInternal( i, argc, argv );
+
+		if ( arg[0] == '-' ) {
+			switch ( arg[1] ) {
+				case 'h': TemperShowUsageInternal(); exit( EXIT_SUCCESS );
+				case 'a': TemperTurnFlagOnInternal( TEMPER_FLAG_ABORT_ON_FAIL ); break;
+				case 'c': TemperTurnFlagOnInternal( TEMPER_FLAG_COLORED_OUTPUT ); break;
+				case 't': {
+					if ( !nextArg ) {
+						TemperShowUsageInternal();
+						exit( EXIT_FAILURE );
+					}
+
+					TemperFilterTestInternal( nextArg );
+					i++;
+					break;
+				}
+
+				case 's': {
+					if ( !nextArg ) {
+						TemperShowUsageInternal();
+						exit( EXIT_FAILURE );
+					}
+
+					TemperFilterSuiteInternal( nextArg );
+					i++;
+					break;
+				}
+
+				case '-': {
+					if ( strcmp( arg, "--help" ) == 0 ) {
+						TemperShowUsageInternal();
+						exit( EXIT_SUCCESS );
+					} else if ( strstr( arg, "--time-unit=" ) ) {
+						const char* unitStart = (const char*) memchr( arg, '=', arglen );
+						unitStart++;
+						char unitStr[1024];
+						sprintf( unitStr, "%s", unitStart );
+
+						temperTimeUnit_t unit = g_testContext.timeUnit;
+
+						if ( strcmp( unitStart, "clocks" ) == 0 ) {
+							unit = TEMPER_TIME_UNIT_CLOCKS;
+						} else if ( strcmp( unitStart, "ns" ) == 0 ) {
+							unit = TEMPER_TIME_UNIT_NS;
+						} else if ( strcmp( unitStart, "us" ) == 0 ) {
+							unit = TEMPER_TIME_UNIT_US;
+						} else if ( strcmp( unitStart, "ms" ) == 0 ) {
+							unit = TEMPER_TIME_UNIT_MS;
+						} else if ( strcmp( unitStart, "seconds" ) == 0 ) {
+							unit = TEMPER_TIME_UNIT_SECONDS;
+						} else {
+							printf( "ERROR: Unknown time unit passed into Temper.\n" );
+							TemperShowUsageInternal();
+							exit( EXIT_FAILURE );
+						}
+
+						TemperSetTimeUnitInternal( unit );
+					}
+					break;
+				}
+
+				default:
+					printf( "ERROR: '%s' is an unknown arg.\n", arg );
+					TemperShowUsageInternal();
+					exit( EXIT_FAILURE );
+					break;
+			}
+		}
+	}
+}
+
+static void TemperSetTestStartCallbackInternal( const temperTestCallback_t callback, void* userdata ) {
+	g_testContext.testFuncStart = callback;
+	g_testContext.testFuncStartData = userdata;
+}
+
+static void TemperSetTestEndCallbackInternal( const temperTestCallback_t callback, void* userdata ) {
+	g_testContext.testFuncEnd = callback;
+	g_testContext.testFuncEndData = userdata;
+}
+
+static void TemperSetSuiteStartCallbackInternal( const temperTestCallback_t callback, void* userdata ) {
+	g_testContext.suiteFuncStart = callback;
+	g_testContext.suiteFuncStartData = userdata;
+}
+
+static void TemperSetSuiteEndCallbackInternal( const temperTestCallback_t callback, void* userdata ) {
+	g_testContext.suiteFuncEnd = callback;
+	g_testContext.suiteFuncEndData = userdata;
+}
+
+static temperTestResult_t TemperPassInternal( void ) {
+	g_testContext.numPassed++;
+	return TEMPER_RESULT_PASSED;
+}
+
+static temperTestResult_t TemperFailTestInternal( const char* errorMsg ) {
+	g_testContext.file = __FILE__;
+	g_testContext.line = __LINE__;
+	g_testContext.msg = errorMsg;
+
+	g_testContext.numFailed++;
+
+	return TEMPER_RESULT_FAILED;
+}
+
+static void TemperRunSuiteInternal2( void ( suite )( void ) ) {
+	if ( g_testContext.suiteFuncStart ) {
+		g_testContext.suiteFuncStart( g_testContext.suiteFuncStartData );
+	}
+
+	suite();
+
+	if ( g_testContext.suiteFuncEnd ) {
+		g_testContext.suiteFuncEnd( g_testContext.suiteFuncEndData );
+	}
+}
+
+static void TemperRunSuiteInternal( void ( suite )( void ), const char* suiteName ) {
+	if ( g_testContext.filteredSuite ) {
+		if ( strcmp( g_testContext.filteredSuite, suiteName ) == 0 ) {
+			TemperRunSuiteInternal2( suite );
+		}
+	} else {
+		TemperRunSuiteInternal2( suite );
+	}
+}
+
+static temperTestResult_t TemperGetTestResult( temperTestResult_t( test )( void ) ) {
+	if ( g_testContext.testFuncStart ) {
+		g_testContext.testFuncStart( g_testContext.testFuncStartData );
+	}
+
+	double start = TemperGetTimestampInternal();
+	temperTestResult_t result = test(); /* run the test! */
+	double end = TemperGetTimestampInternal();
+
+	g_testContext.testTime = end - start;
+
+	if ( g_testContext.testFuncEnd ) {
+		g_testContext.testFuncEnd( g_testContext.testFuncEndData );
+	}
+
+	return result;
+}
+
+static void TemperRunTestInternal( temperTestResult_t( test )( void ), const char* testName ) {
+	if ( ( ( g_testContext.flags & TEMPER_FLAG_ABORT_ON_FAIL ) == 0 ) || g_testContext.numFailed == 0 ) {
+		temperTestResult_t result = TEMPER_RESULT_SKIPPED;
+		if ( g_testContext.filteredTest ) {
+			if ( strcmp( g_testContext.filteredTest, testName ) == 0 ) {
+				result = TemperGetTestResult( test );
+			}
+		} else {
+			result = TemperGetTestResult( test );
+		}
+
+		switch ( result ) {
+			case TEMPER_RESULT_PASSED: {
+				TemperSetTextColorInternal( TEMPER_COLOR_GREEN );
+				printf( "	PASSED:" );
+				TemperSetTextColorInternal( TEMPER_COLOR_DEFAULT );
+				printf( "  %s (%f %s).\n", testName, g_testContext.testTime, g_testContext.timeUnitStr );
+				break;
+			}
+
+			case TEMPER_RESULT_FAILED: {
+				TemperSetTextColorInternal( TEMPER_COLOR_RED );
+				printf( "	FAILED:" );
+				TemperSetTextColorInternal( TEMPER_COLOR_YELLOW );
+
+				if ( g_testContext.msg ) {
+					printf( "  %s: \"%s\" at %s:%d.\n", testName, g_testContext.msg, g_testContext.file, g_testContext.line );
+				} else {
+					printf( "  %s: at %s:%d.\n", testName, g_testContext.file, g_testContext.line );
+				}
+
+				TemperSetTextColorInternal( TEMPER_COLOR_DEFAULT );
+				break;
+			}
+
+			case TEMPER_RESULT_SKIPPED:
+				/* skipped is handled differently */
+				break;
+		}
+	}
+}
+
+static void TemperSkipTestInternal2( const char* testName, const char* reasonMsg ) {
+	printf( "	SKIPPED: %s: \"%s\".\n", testName, reasonMsg );
+	g_testContext.numSkipped++;
+}
+
+static void TemperSkipTestInternal( const char* testName, const char* reasonMsg ) {
+	if ( ( ( g_testContext.flags & TEMPER_FLAG_ABORT_ON_FAIL ) == 0 ) || g_testContext.numFailed == 0 ) {
+		if ( g_testContext.filteredTest ) {
+			if ( strcmp( g_testContext.filteredTest, testName ) == 0 ) {
+				TemperSkipTestInternal2( testName, reasonMsg );
+			}
+		}
+	} else {
+		TemperSkipTestInternal2( testName, reasonMsg );
+	}
+}
+
+static void TemperExpectTrueInternal( const bool condition, const char* conditionStr ) {
+	g_testContext.msg = NULL;
+	if ( !condition ) {
+		TemperFailTestInternal( conditionStr );
+	}
+}
+
+static void TemperExpectFalse( const bool condition, const char* conditionStr ) {
+	g_testContext.msg = NULL;
+	if ( condition ) {
+		TemperFailTestInternal( conditionStr );
+	}
+}
+
+// initialises Temper
+// this is required to make Temper work properly
+#ifdef __cplusplus
+#define TEMPER_DEFS() \
+	temperTestContext_t				g_testContext	= {}
+#else
+#define TEMPER_DEFS() \
+	temperTestContext_t				g_testContext	= { 0 }
+#endif
+
+// returns the program exit code according to Temper
+#define TEMPER_EXIT_CODE()			( ( g_testContext.numFailed == 0 ) ? 0 : 1 )
+
+// forward declare a test suite
+#define TEMPER_SUITE_EXTERN( name )	void (name)( void )
+
+// defines a test suite (with your code)
+#define TEMPER_SUITE( name )		TEMPER_SUITE_EXTERN( name ); void (name)( void )
+
+// forward declare a test
+#define TEMPER_TEST_EXTERN( name )	temperTestResult_t (name)( void )
+
+// defines a test (with your code)
+#define TEMPER_TEST( name )			TEMPER_TEST_EXTERN( name ); temperTestResult_t (name)( void )
+
 // get the stats from temper on passed, failed, and skipped tests
 // you'll probably only want to display this at the end of your test program
-#define TEMPER_SHOW_STATS() \
-	do { \
-		uint32_t totalTests = g_testContext.numPassed + g_testContext.numFailed + g_testContext.numSkipped; \
-		printf( "\n%d tests run in total.  %d passed, %d failed, %d skipped.\n", totalTests, g_testContext.numPassed, g_testContext.numFailed, g_testContext.numSkipped ); \
-	} while ( 0 )
+#define TEMPER_SHOW_STATS()										TemperShowStatsInternal()
 
 // enable one or more temperFlags_t
-#define TEMPER_TURN_FLAG_ON( flag ) \
-	do { \
-		g_testContext.flags |= (flag); \
-	} while ( 0 )
+#define TEMPER_TURN_FLAG_ON( flag )								TemperTurnFlagOnInternal( flag )
 
 // disable one or more temperFlags_t
-#define TEMPER_TURN_FLAG_OFF( flag ) \
-	do { \
-		g_testContext.flags &= ~(flag); \
-	} while ( 0 )
-
-#define TEMPER_FILTER_SUITE_INTERNAL( suiteName ) \
-	do { \
-		g_testContext.filteredSuite = suiteName; \
-	} while ( 0 )
+#define TEMPER_TURN_FLAG_OFF( flag )							TemperTurnFlagOffInternal( flag )
 
 // tell Temper that you only want to run this suite
 // you will still need to manually run it
-#define TEMPER_FILTER_SUITE( suite ) \
-	TEMPER_FILTER_SUITE_INTERNAL( #suite )
-
-#define TEMPER_FILTER_TEST_INTERNAL( testName ) \
-	do { \
-		g_testContext.filteredTest = testName; \
-	} while ( 0 )
+#define TEMPER_FILTER_SUITE( suite )							TemperFilterSuiteInternal( #suite )
 
 // tell Temper that you only want to run this test
 // you will still need to manually run it
-#define TEMPER_FILTER_TEST( test ) \
-	TEMPER_FILTER_TEST_INTERNAL( #test )
+#define TEMPER_FILTER_TEST( test )								TemperFilterTestInternal( #test )
+
+// set the unit of measurement that Temper will use when recording how long a test takes
+#define TEMPER_SET_TIME_UNIT( unit )							TemperSetTimeUnitInternal( unit )
 
 // set Temper's command line args (and therefore settings) in one go
 // this call is optional
 // you can also call various functions in Temper to do the same things
-#define TEMPER_SET_COMMAND_LINE_ARGS( argc, argv ) \
-	do { \
-		/* set defaults in case args don't get set */ \
-		TEMPER_SET_TIME_UNIT( TEMPER_TIME_UNIT_MS ); \
-\
-		for ( int i = 0; i < argc; i++ ) { \
-			const char* arg = argv[i]; \
-			const char* nextArg = TemperGetNextArgInternal( i, argc, argv ); \
-			size_t arglen = strlen( arg ); \
-\
-			if ( arg[0] == '-' ) { \
-				switch ( arg[1] ) { \
-					case 'h': TemperShowUsageInternal(); exit( EXIT_SUCCESS ); \
-\
-					case 'a': TEMPER_TURN_FLAG_ON( TEMPER_FLAG_ABORT_ON_FAIL ); break; \
-					case 'c': TEMPER_TURN_FLAG_ON( TEMPER_FLAG_COLORED_OUTPUT ); break; \
-\
-					case 't': { \
-						if ( !nextArg ) { \
-							TemperShowUsageInternal(); \
-							exit( EXIT_FAILURE ); \
-						} \
-\
-						TEMPER_FILTER_TEST( nextArg ); \
-						i++; \
-						break; \
-					} \
-\
-					case 's': { \
-						if ( !nextArg ) { \
-							TemperShowUsageInternal(); \
-							exit( EXIT_FAILURE ); \
-						} \
-\
-						TEMPER_FILTER_SUITE( nextArg ); \
-						i++; \
-						break; \
-					} \
-\
-					case '-': { \
-						if ( strcmp( arg, "--help" ) == 0 ) { \
-							TemperShowUsageInternal(); \
-							exit( EXIT_SUCCESS ); \
-						} else if ( strstr( arg, "--time-unit=" ) ) { \
-							const char* unitStart = (const char*) memchr( arg, '=', arglen ); \
-							unitStart++; \
-\
-							char unitStr[1024]; \
-							sprintf( unitStr, "%s", unitStart ); \
-\
-							if ( strcmp( unitStart, "clocks" ) == 0 ) { \
-								TEMPER_SET_TIME_UNIT( TEMPER_TIME_UNIT_CLOCKS ); \
-							} else if ( strcmp( unitStart, "ns" ) == 0 ) { \
-								TEMPER_SET_TIME_UNIT( TEMPER_TIME_UNIT_NS ); \
-							} else if ( strcmp( unitStart, "us" ) == 0 ) { \
-								TEMPER_SET_TIME_UNIT( TEMPER_TIME_UNIT_US ); \
-							} else if ( strcmp( unitStart, "ms" ) == 0 ) { \
-								TEMPER_SET_TIME_UNIT( TEMPER_TIME_UNIT_MS ); \
-							} else if ( strcmp( unitStart, "seconds" ) == 0 ) { \
-								TEMPER_SET_TIME_UNIT( TEMPER_TIME_UNIT_SECONDS ); \
-							} else { \
-								printf( "ERROR: Unknown time unit passed into Temper.\n" ); \
-								TemperShowUsageInternal(); \
-								exit( EXIT_FAILURE ); \
-							} \
-						} \
-						break; \
-					} \
-\
-					default: \
-						printf( "ERROR: '%s' is an unknown arg.\n", arg ); \
-						TemperShowUsageInternal(); \
-						exit( EXIT_FAILURE ); \
-						break; \
-				} \
-			} \
-		} \
-	} while ( 0 )
+#define TEMPER_SET_COMMAND_LINE_ARGS( argc, argv )				TemperSetCommandLineArgsInternal( argc, argv )
 
 // set the function that will get called just before a test starts
-#define TEMPER_SET_TEST_START_CALLBACK( callback, userdata ) \
-	do { \
-		g_testContext.testFuncStart = callback; \
-		g_testContext.testFuncStartData = userdata; \
-	} while ( 0 )
+#define TEMPER_SET_TEST_START_CALLBACK( callback, userdata )	TemperSetTestStartCallbackInternal( callback, userdata )
 
 // set the function that will get called just after a test ends and before console output
-#define TEMPER_SET_TEST_END_CALLBACK( callback, userdata ) \
-	do { \
-		g_testContext.testFuncEnd = callback; \
-		g_testContext.testFuncEndData = userdata; \
-	} while ( 0 )
+#define TEMPER_SET_TEST_END_CALLBACK( callback, userdata )		TemperSetTestEndCallbackInternal( callback, userdata )
 
 // set the function that will get called just before a test suite starts
-#define TEMPER_SET_SUITE_START_CALLBACK( callback, userdata ) \
-	do { \
-		g_testContext.suiteFuncStart = callback; \
-		g_testContext.suiteFuncStartData = userdata; \
-	} while ( 0 )
+#define TEMPER_SET_SUITE_START_CALLBACK( callback, userdata )	TemperSetSuiteStartCallbackInternal( callback, userdata )
 
 // set the function that will get called just after a test suite ends and before console output
-#define TEMPER_SET_SUITE_END_CALLBACK( callback, userdata ) \
-	do { \
-		g_testContext.suiteFuncEnd = callback; \
-		g_testContext.suiteFuncEndData = userdata; \
-	} while ( 0 )
-
-// set the unit of measurement that Temper will use when recording how long a test takes
-#define TEMPER_SET_TIME_UNIT( unit ) \
-	do { \
-		g_testContext.timeUnit = unit; \
-\
-		switch ( unit ) { \
-			case TEMPER_TIME_UNIT_CLOCKS:	g_testContext.timeUnitStr = "clocks"; break; \
-			case TEMPER_TIME_UNIT_NS:		g_testContext.timeUnitStr = "ns"; break; \
-			case TEMPER_TIME_UNIT_US:		g_testContext.timeUnitStr = "us"; break; \
-			case TEMPER_TIME_UNIT_MS:		g_testContext.timeUnitStr = "ms"; break; \
-			case TEMPER_TIME_UNIT_SECONDS:	g_testContext.timeUnitStr = "seconds"; break; \
-			\
-			default: \
-				printf( "ERROR: Unknown time unit specified at %s:%d.\n", __FILE__, __LINE__ ); \
-				assert( false ); \
-				exit( EXIT_FAILURE ); \
-		} \
-	} while ( 0 )
-
-#define TEMPER_FAIL_TEST_INTERNAL( fmt ) \
-	do { \
-		g_testContext.file = __FILE__; \
-		g_testContext.line = __LINE__; \
-		g_testContext.msg = (fmt); \
-\
-		g_testContext.numFailed++; \
-\
-		return TEMPER_RESULT_FAILED; \
-	} while ( 0 )
-
-#define TEMPER_RUN_SUITE_INTERNAL( suite ) \
-	do { \
-		if ( g_testContext.suiteFuncStart ) { \
-			g_testContext.suiteFuncStart( g_testContext.suiteFuncStartData ); \
-		} \
-\
-		suite(); \
-\
-		if ( g_testContext.suiteFuncEnd ) { \
-			g_testContext.suiteFuncEnd( g_testContext.suiteFuncEndData ); \
-		} \
-	} while ( 0 )
+#define TEMPER_SET_SUITE_END_CALLBACK( callback, userdata )		TemperSetSuiteEndCallbackInternal( callback, userdata )
 
 // runs the test suite
-#define TEMPER_RUN_SUITE( suite ) \
-	do { \
-		if ( g_testContext.filteredSuite ) { \
-			if ( strcmp( g_testContext.filteredSuite, #suite ) == 0 ) { \
-				TEMPER_RUN_SUITE_INTERNAL( suite ); \
-			} \
-		} else { \
-			TEMPER_RUN_SUITE_INTERNAL( suite ); \
-		} \
-	} while ( 0 )
-
-#define TEMPER_RUN_TEST_INTERNAL( test ) \
-	do { \
-		if ( g_testContext.testFuncStart ) { \
-			g_testContext.testFuncStart( g_testContext.testFuncStartData ); \
-		} \
-\
-		double start = TemperGetTimestampInternal(); \
-		result = test(); /* run the test! */ \
-		double end = TemperGetTimestampInternal(); \
-\
-		g_testContext.testTime = end - start; \
-\
-		if ( g_testContext.testFuncEnd ) { \
-			g_testContext.testFuncEnd( g_testContext.testFuncEndData ); \
-		} \
-	} while ( 0 )
+#define TEMPER_RUN_SUITE( suite )								TemperRunSuiteInternal( suite, #suite )
 
 // runs the test
-#define TEMPER_RUN_TEST( test ) \
-	do { \
-		if ( ( ( g_testContext.flags & TEMPER_FLAG_ABORT_ON_FAIL ) == 0 ) || g_testContext.numFailed == 0 ) { \
-			temperTestResult_t result = TEMPER_RESULT_SKIPPED; \
-			if ( g_testContext.filteredTest ) { \
-				if ( strcmp( g_testContext.filteredTest, #test ) == 0 ) { \
-					TEMPER_RUN_TEST_INTERNAL( test ); \
-				} \
-			} else { \
-				TEMPER_RUN_TEST_INTERNAL( test ); \
-			} \
-\
-			switch ( result ) { \
-				case TEMPER_RESULT_PASSED: { \
-					TemperSetTextColorInternal( TEMPER_COLOR_GREEN ); \
-					printf( "	PASSED:" ); \
-					TemperSetTextColorInternal( TEMPER_COLOR_DEFAULT ); \
-					printf( "  %s (%f %s).\n", #test, g_testContext.testTime, g_testContext.timeUnitStr ); \
-					break; \
-				} \
-\
-				case TEMPER_RESULT_FAILED: { \
-					TemperSetTextColorInternal( TEMPER_COLOR_RED ); \
-					printf( "	FAILED:" ); \
-					TemperSetTextColorInternal( TEMPER_COLOR_YELLOW ); \
-					if ( g_testContext.msg ) { \
-						printf( "  %s: \"%s\" at %s:%d.\n", #test, g_testContext.msg, g_testContext.file, g_testContext.line ); \
-					} else { \
-						printf( "  %s: at %s:%d.\n", #test, g_testContext.file, g_testContext.line ); \
-					} \
-					TemperSetTextColorInternal( TEMPER_COLOR_DEFAULT ); \
-					break; \
-				} \
-\
-				case TEMPER_RESULT_SKIPPED: \
-					/* skipped is handled differently */ \
-					break; \
-			} \
-		} \
-	} while ( 0 )
-
-#define TEMPER_SKIP_TEST_INTERNAL( test, reasonMsg ) \
-	do { \
-		printf( "	SKIPPED: %s: \"%s\".\n", #test, reasonMsg ); \
-		g_testContext.numSkipped++; \
-	} while ( 0 )
+#define TEMPER_RUN_TEST( test )									TemperRunTestInternal( test, #test )
 
 // marks this test to be skipped
 // the test will still be outputted to console, but it will not actually run
-#define TEMPER_SKIP_TEST( test, reasonMsg ) \
-	do { \
-		if ( ( ( g_testContext.flags & TEMPER_FLAG_ABORT_ON_FAIL ) == 0 ) || g_testContext.numFailed == 0 ) { \
-			if ( g_testContext.filteredTest ) { \
-				if ( strcmp( g_testContext.filteredTest, #test ) == 0 ) { \
-					TEMPER_SKIP_TEST_INTERNAL( test, reasonMsg ); \
-				} \
-			} else { \
-				TEMPER_SKIP_TEST_INTERNAL( test, reasonMsg ); \
-			} \
-		} \
-	} while ( 0 )
+#define TEMPER_SKIP_TEST( test, reasonMsg )						TemperSkipTestInternal( #test, reasonMsg )
 
 // fails the test if the condition is not true
-#define TEMPER_EXPECT_TRUE( condition ) \
-	do { \
-		g_testContext.msg = NULL; \
-		if ( !(condition) ) { \
-			TEMPER_FAIL_TEST_INTERNAL( #condition ); \
-		} \
-	} while ( 0 )
+#define TEMPER_EXPECT_TRUE( condition )							TemperExpectTrueInternal( condition, #condition )
 
 // fails the test if the condition is not false
-#define TEMPER_EXPECT_FALSE( condition ) \
-	do { \
-		g_testContext.msg = NULL; \
-		if ( (condition) ) { \
-			TEMPER_FAIL_TEST_INTERNAL( #condition ); \
-		} \
-	} while ( 0 )
+#define TEMPER_EXPECT_FALSE( condition )						TemperExpectFalse( condition, #condition )
 
 // exit the test, telling temper that the test has passed
-#define TEMPER_PASS() \
-	do { \
-		g_testContext.numPassed++; \
-		return TEMPER_RESULT_PASSED; \
-	} while ( 0 )
+#define TEMPER_PASS()	return TemperPassInternal()
 
-#define TEMPER_FAIL() \
-	TEMPER_FAIL_TEST_INTERNAL( NULL )
+#define TEMPER_FAIL()	return TemperFailTestInternal( NULL )
 
 #if defined( __linux__ ) || defined( __APPLE__ )
 #pragma pop_macro( "_POSIX_C_SOURCE" )
