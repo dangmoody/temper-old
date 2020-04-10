@@ -539,7 +539,7 @@ static temperTestResult_t TemperPassInternal( void ) {
 static temperTestResult_t TemperFailTestInternal( const char* errorMsg, const char* file, const int line ) {
 	g_testContext.msg = errorMsg;
 	g_testContext.file = file;
-	g_testContext.line = line;
+	g_testContext.line = (uint32_t) line;
 
 	g_testContext.numFailed++;
 
