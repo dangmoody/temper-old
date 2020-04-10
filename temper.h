@@ -362,8 +362,11 @@ static void TemperSetTextColorInternal( const temperTestConsoleColor_t color ) {
 		return;
 	}
 
-	/* DM!!! add mac/linux back in! */
+#ifdef _WIN32
 	SetConsoleTextAttribute( GetStdHandle( STD_OUTPUT_HANDLE ), (WORD) color );
+#else
+	printf( "%s", color );
+#endif
 }
 
 static const char* TemperGetNextArgInternal( const int argIndex, const int argc, char** argv ) {
@@ -397,7 +400,7 @@ static void TemperShowUsageInternal( void ) {
 }
 
 static double TemperGetTimestampInternal( void ) {
-	/* DM!!! add mac/linux back in! */
+#ifdef _WIN32
 	static LARGE_INTEGER frequency;
 	if ( frequency.QuadPart == 0 ) {
 		QueryPerformanceFrequency( &frequency );
@@ -413,8 +416,22 @@ static double TemperGetTimestampInternal( void ) {
 		case TEMPER_TIME_UNIT_MS:		return (double) ( ( now.QuadPart * 1000 ) / frequency.QuadPart );
 		case TEMPER_TIME_UNIT_SECONDS:	return (double) ( ( now.QuadPart ) / frequency.QuadPart );
 	}
+#else
+	struct timespec now;
+	clock_gettime( CLOCK_MONOTONIC, &now );
 
-	/* should never get here */
+	int64_t clocks = (int64_t) ( now.tv_sec * 1000000000 + now.tv_nsec );
+
+	switch ( g_testContext.timeUnit ) {
+		case TEMPER_TIME_UNIT_CLOCKS:	return (double) clocks;
+		case TEMPER_TIME_UNIT_NS:		return (double) clocks;
+		case TEMPER_TIME_UNIT_US:		return (double) clocks / 1000.0;
+		case TEMPER_TIME_UNIT_MS:		return (double) clocks / 1000000.0;
+		case TEMPER_TIME_UNIT_SECONDS:	return (double) clocks / 1000000000.0;
+	}
+#endif
+
+	// should never get here
 	assert( false && "Unrecognised time unit passed into TemperGetTimestampInternal().\n" );
 
 	return 0.0;
@@ -459,7 +476,7 @@ static void TemperSetTimeUnitInternal( const temperTimeUnit_t unit ) {
 }
 
 static void TemperSetCommandLineArgsInternal( int argc, char** argv ) {
-	/* set defaults in case args don't get set */
+	// set defaults in case args don't get set
 	TemperSetTimeUnitInternal( TEMPER_TIME_UNIT_MS );
 
 	for ( int i = 0; i < argc; i++ ) {
@@ -601,7 +618,7 @@ static temperTestResult_t TemperGetTestResult( temperTestResult_t( test )( void 
 	}
 
 	double start = TemperGetTimestampInternal();
-	temperTestResult_t result = test(); /* run the test! */
+	temperTestResult_t result = test(); // run the test!
 	double end = TemperGetTimestampInternal();
 
 	g_testContext.testTime = end - start;
@@ -649,7 +666,7 @@ static void TemperRunTestInternal( temperTestResult_t( test )( void ), const cha
 			}
 
 			case TEMPER_RESULT_SKIPPED:
-				/* skipped is handled differently */
+				// skipped is handled differently
 				break;
 		}
 	}
