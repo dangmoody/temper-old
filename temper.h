@@ -629,7 +629,7 @@ static void TemperRunTestInternal( temperTestResult_t( test )( void ), const cha
 }
 
 static void TemperSkipTestInternal2( const char* testName, const char* reasonMsg ) {
-	printf( "	SKIPPED: %s: \"%s\".\n", testName, reasonMsg );
+	printf( "\tSKIPPED: %s: \"%s\".\n", testName, reasonMsg );
 	g_testContext.numSkipped++;
 }
 
@@ -639,9 +639,9 @@ static void TemperSkipTestInternal( const char* testName, const char* reasonMsg 
 			if ( strcmp( g_testContext.filteredTest, testName ) == 0 ) {
 				TemperSkipTestInternal2( testName, reasonMsg );
 			}
+		} else {
+			TemperSkipTestInternal2( testName, reasonMsg );
 		}
-	} else {
-		TemperSkipTestInternal2( testName, reasonMsg );
 	}
 }
 
