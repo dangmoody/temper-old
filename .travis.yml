@@ -5,14 +5,14 @@ matrix:
       os: windows
       language: c
       script:
-        - cmd.exe //C 'travis_build_msvc.bat' c
+        - cmd.exe //C 'tools/travis_build_msvc.bat' c
 
     # windows msvc C++
     - name: "Windows / MSVC / C++"
       os: windows
       language: cpp
       script:
-        - cmd.exe //C 'travis_build_msvc.bat' cpp
+        - cmd.exe //C 'tools/travis_build_msvc.bat' cpp
 
     # windows clang
     - name: "Windows / Clang"
