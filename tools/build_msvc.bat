@@ -17,6 +17,7 @@ set examplesdir="..\\examples"
 pushd %examplesdir%
 
 if not exist build mkdir build
+if not exist build\\intermediate mkdir build\\intermediate
 
 if /I [%cpp%]==[cpp] (
 	echo.
