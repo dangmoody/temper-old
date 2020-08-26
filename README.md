@@ -1,6 +1,6 @@
 # Temper
 
-[![Build Status](https://travis-ci.com/floorman/temper.svg?branch=master)](https://travis-ci.com/floorman/temper)
+[![Build Status](https://travis-ci.com/dangmoody/temper.svg?branch=master)](https://travis-ci.com/dangmoody/temper)
 
 A Single-header-only test framework, written in C99.
 
