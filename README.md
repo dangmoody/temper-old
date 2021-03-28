@@ -1,5 +1,7 @@
 # Temper
 
+## THIS REPO HAS BEEN REPLACED BY A NEWER VERSION OF TEMPER.  [GO HERE INSTEAD](https://github.com/dangmoody/temper.git)
+
 [![Build Status](https://travis-ci.com/dangmoody/temper.svg?branch=master)](https://travis-ci.com/dangmoody/temper)
 
 A Single-header-only test framework, written in C99.
